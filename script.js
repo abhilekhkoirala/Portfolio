@@ -5,7 +5,7 @@
 const CONFIG = {
   GITHUB_USERNAME: "abhilekhkoirala",     // e.g. "abhilekh-koirala" — leave "" to show placeholders instead
   GITHUB_REPO_COUNT: 6,    // how many repos to show
-  LINKEDIN_URL: "",        // e.g. "https://linkedin.com/in/your-handle"
+  LINKEDIN_URL: "https://www.linkedin.com/in/abhilekh-koirala-863028280/",        // e.g. "https://linkedin.com/in/your-handle"
   GITHUB_PROFILE_URL: "",  // optional override; defaults to github.com/<username>
 };
 
