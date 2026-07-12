@@ -96,38 +96,146 @@ function initGlyphStrip(){
   });
 }
 
-/* ---------------- rubik's cube (red / black / white) ---------------- */
+/* ---------------- rubik's cube (real 3x3x3 piece simulation) ----------------
+   Instead of recoloring flat stickers, this builds 26 individual "cubie"
+   pieces positioned in 3D. Shuffling picks a real layer (a 3x3 slab of 9
+   pieces), rotates that whole slab 90/180/270deg around its axis with a
+   visible animated turn, then "bakes" the result and moves on to the next
+   move — the same way a physical cube (or a WCA scramble) actually works.
+   Colors are attached to pieces, not grid positions, so they travel with
+   the piece through every turn. ---------------------------------------- */
 function initCube(){
   const scene = document.getElementById('cubeScene');
-  if(!scene) return;
+  const mount = document.getElementById('rubiksCube');
+  if(!scene || !mount) return;
 
-  const faces = [...scene.querySelectorAll('.cube-face')]; // front, back, right, left, top, bottom
+  const CUBIE = 48;      // px, size of one small piece
+  const GAP = 4;         // px, gap between pieces
+  const STEP = CUBIE + GAP;
+  const TURN_MS = 340;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // a fixed "scrambled" starting pattern per face — 9 cells each, r/k/w
-  const START_PATTERN = [
-    ['r','k','w','k','r','k','w','k','r'],
-    ['k','w','r','w','k','w','r','w','k'],
-    ['w','r','k','r','w','r','k','r','w'],
-    ['k','k','r','w','r','w','r','k','k'],
-    ['r','w','k','k','k','w','w','r','r'],
-    ['w','k','r','r','w','k','k','r','w'],
-  ];
+  // Opposite faces share a color, like a real cube's fixed color pairs —
+  // gives a clean "solved" look to start, which then visibly mixes as it scrambles.
+  const FACE_COLOR = { front: 'r', back: 'r', left: 'k', right: 'k', top: 'w', bottom: 'w' };
 
-  faces.forEach((face, fi) => {
-    face.innerHTML = '';
-    START_PATTERN[fi].forEach(color => {
-      const s = document.createElement('span');
-      s.className = `sticker ${color}`;
-      face.appendChild(s);
+  mount.innerHTML = '';
+  mount.style.position = 'relative';
+
+  // NOTE: y follows plain CSS convention (+y = down on screen), so a piece's
+  // "top" sticker is rendered when its y slot is -1, "bottom" when +1.
+  const cubies = [];
+  for(let x = -1; x <= 1; x++){
+    for(let y = -1; y <= 1; y++){
+      for(let z = -1; z <= 1; z++){
+        if(x === 0 && y === 0 && z === 0) continue; // hidden core, never visible
+        cubies.push(buildCubie(x, y, z));
+      }
+    }
+  }
+
+  function buildCubie(x, y, z){
+    const el = document.createElement('div');
+    el.className = 'cubie';
+    const transformStr = `translate3d(${x*STEP}px, ${y*STEP}px, ${z*STEP}px)`;
+    el.style.transform = transformStr;
+
+    const faceDirs = [];
+    if(z === 1) faceDirs.push('front');
+    if(z === -1) faceDirs.push('back');
+    if(x === 1) faceDirs.push('right');
+    if(x === -1) faceDirs.push('left');
+    if(y === -1) faceDirs.push('top');
+    if(y === 1) faceDirs.push('bottom');
+
+    faceDirs.forEach(dir => {
+      const f = document.createElement('div');
+      f.className = `cubie-face ${dir} ${FACE_COLOR[dir]}`;
+      el.appendChild(f);
     });
-  });
 
-  function shuffle(){
-    const palette = ['r', 'k', 'w'];
-    scene.querySelectorAll('.sticker').forEach(s => {
-      const next = palette[Math.floor(Math.random() * palette.length)];
-      s.className = `sticker ${next}`;
+    mount.appendChild(el);
+    return { el, pos: { x, y, z }, transformStr };
+  }
+
+  // Rotate an integer grid position by a multiple of 90deg around an axis —
+  // uses the exact same matrices CSS rotateX/Y/Z use, so logical position
+  // tracking always matches what's actually on screen.
+  function rotatePos(p, axis, angle){
+    const rad = angle * Math.PI / 180;
+    const cos = Math.round(Math.cos(rad));
+    const sin = Math.round(Math.sin(rad));
+    const { x, y, z } = p;
+    if(axis === 'x') return { x, y: y*cos - z*sin, z: y*sin + z*cos };
+    if(axis === 'y') return { x: x*cos + z*sin, y, z: -x*sin + z*cos };
+    return { x: x*cos - y*sin, y: x*sin + y*cos, z };
+  }
+
+  function applyMove({ axis, slot, angle }){
+    return new Promise(resolve => {
+      const affected = cubies.filter(c => c.pos[axis] === slot);
+      if(affected.length === 0){ resolve(); return; }
+
+      const axisFn = axis === 'x' ? 'rotateX' : axis === 'y' ? 'rotateY' : 'rotateZ';
+
+      const group = document.createElement('div');
+      group.className = 'layer-group';
+      mount.appendChild(group);
+      affected.forEach(c => group.appendChild(c.el));
+
+      const bake = () => {
+        affected.forEach(c => {
+          c.transformStr = `${axisFn}(${angle}deg) ${c.transformStr}`;
+          c.el.style.transform = c.transformStr;
+          c.pos = rotatePos(c.pos, axis, angle);
+          mount.appendChild(c.el);
+        });
+        group.remove();
+        resolve();
+      };
+
+      if(reduced){
+        group.style.transform = `${axisFn}(${angle}deg)`;
+        bake();
+        return;
+      }
+
+      void group.offsetWidth; // force reflow before transition
+      group.style.transition = `transform ${TURN_MS}ms cubic-bezier(.4,0,.2,1)`;
+      requestAnimationFrame(() => { group.style.transform = `${axisFn}(${angle}deg)`; });
+
+      let done = false;
+      const finish = () => { if(done) return; done = true; bake(); };
+      group.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, TURN_MS + 80); // fallback in case transitionend doesn't fire
     });
+  }
+
+  function randomMove(excludeAxis){
+    const axes = ['x', 'y', 'z'].filter(a => a !== excludeAxis);
+    const axis = axes[Math.floor(Math.random() * axes.length)];
+    const slot = Math.random() < 0.5 ? 1 : -1;
+    const angles = [90, -90, 180];
+    const angle = angles[Math.floor(Math.random() * angles.length)];
+    return { axis, slot, angle };
+  }
+
+  let shuffling = false;
+  async function shuffle(){
+    if(shuffling) return;
+    shuffling = true;
+    scene.classList.add('shuffling');
+
+    const moveCount = 10 + Math.floor(Math.random() * 5); // 10-14 moves, like a real scramble
+    let lastAxis = null;
+    for(let i = 0; i < moveCount; i++){
+      const move = randomMove(lastAxis);
+      lastAxis = move.axis;
+      await applyMove(move);
+    }
+
+    shuffling = false;
+    scene.classList.remove('shuffling');
   }
 
   scene.addEventListener('click', shuffle);
