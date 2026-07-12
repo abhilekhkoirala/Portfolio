@@ -231,7 +231,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 #projects{ position: relative; }
 .ball-scene{
   position: absolute; top: 26px; right: 2%;
-  width: 180px; height: 210px;
+  width: 200px; height: 210px;
   pointer-events: none;
   z-index: 2;
 }
@@ -260,8 +260,8 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
    background-image can't be interpolated, so it just snaps at each
    keyframe stop — a plain CSS flipbook, no JS needed. */
 .player-sprite{
-  position: absolute; left: 0; bottom: 0;
-  width: 80px; height: 155px;
+  position: absolute; left: 0; bottom: 15px;
+  width: 64px; height: 124px;
   background-image: url('assets/basketball/crouch.png');
   background-repeat: no-repeat;
   background-position: bottom center;
@@ -284,20 +284,20 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 /* the ball — hidden while it's baked into the player's hands (crouch/
    windup), fades in right at release and arcs into the hoop */
 .ball-sprite{
-  position: absolute; left: 52px; top: 70px;
-  width: 24px; height: auto;
+  position: absolute; left: 40px; top: 85px;
+  width: 22px; height: auto;
   image-rendering: pixelated;
   opacity: 0;
   animation: ball-shot 3.2s cubic-bezier(.33,0,.2,1) infinite;
 }
 @keyframes ball-shot{
-  0%,38% { left: 52px;  top: 70px; opacity: 0; transform: rotate(0deg); }
-  39%    { left: 52px;  top: 70px; opacity: 1; transform: rotate(0deg); }
-  55%    { left: 80px;  top: 15px; opacity: 1; transform: rotate(140deg); }
-  72%    { left: 120px; top: 20px; opacity: 1; transform: rotate(260deg); }
-  80%    { left: 132px; top: 34px; opacity: 1; transform: rotate(320deg); }
-  86%    { left: 134px; top: 44px; opacity: 0; transform: rotate(360deg); }
-  100%   { left: 52px;  top: 70px; opacity: 0; transform: rotate(360deg); }
+  0%,38% { left: 40px;  top: 85px; opacity: 0; transform: rotate(0deg); }
+  39%    { left: 40px;  top: 85px; opacity: 1; transform: rotate(0deg); }
+  55%    { left: 80px;  top: 20px; opacity: 1; transform: rotate(140deg); }
+  72%    { left: 140px; top: 16px; opacity: 1; transform: rotate(260deg); }
+  80%    { left: 158px; top: 30px; opacity: 1; transform: rotate(320deg); }
+  86%    { left: 160px; top: 42px; opacity: 0; transform: rotate(360deg); }
+  100%   { left: 40px;  top: 85px; opacity: 0; transform: rotate(360deg); }
 }
 @keyframes net-swish{
   0%, 76%  { transform: scaleY(1); }
