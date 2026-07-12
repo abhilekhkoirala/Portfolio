@@ -3,7 +3,7 @@
    Fill these in, then push to GitHub. See README.md.
    ============================================================ */
 const CONFIG = {
-  GITHUB_USERNAME: "",     // e.g. "abhilekh-koirala" — leave "" to show placeholders instead
+  GITHUB_USERNAME: "abhilekhkoirala",     // e.g. "abhilekh-koirala" — leave "" to show placeholders instead
   GITHUB_REPO_COUNT: 6,    // how many repos to show
   LINKEDIN_URL: "",        // e.g. "https://linkedin.com/in/your-handle"
   GITHUB_PROFILE_URL: "",  // optional override; defaults to github.com/<username>
