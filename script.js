@@ -242,6 +242,13 @@ function initCube(){
   scene.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); shuffle(); }
   });
+
+  // Auto-shuffle once on page load, timed to start right as the boot
+  // overlay finishes clearing (see initBoot's total*28+500 timing).
+  const AUTO_SHUFFLE_DELAY = 1300;
+  if(!reduced){
+    setTimeout(shuffle, AUTO_SHUFFLE_DELAY);
+  }
 }
 
 /* ---------------- theme toggle ---------------- */
