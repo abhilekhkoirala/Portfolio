@@ -172,7 +172,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 /* ---------- rubik's cube (hero, top-right) ---------- */
 .cube-scene{
   --cube: 128px;
-  position: absolute; top: 118px; right: 34px;
+  position: absolute; top: 50%; right: 25%;
   width: var(--cube); height: var(--cube);
   perspective: 900px;
   cursor: pointer;
