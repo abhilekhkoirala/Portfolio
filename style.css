@@ -360,13 +360,13 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
    "flying" back to their start squares rather than an instant cut. */
 .mini-chess-scene{
   position: absolute; top: 24px; right: 3%;
-  width: 212px; height: 132px;
+  width: 214px; height: 136px;
   pointer-events: none;
   z-index: 2;
 }
 .mini-chess-board-wrap{
   position: absolute; left: 40px; top: 0;
-  width: 132px; height: 132px;
+  width: 136px; height: 136px;
   border: 4px solid var(--chess-frame); border-radius: 1px;
   box-shadow: 0 6px 18px rgba(0,0,0,.12);
   overflow: hidden;
@@ -379,14 +379,39 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 .mini-chess-sq.dark{ background: var(--chess-dark); }
 
 .mini-chess-layer{ position: absolute; inset: 0; }
+/* Piece box is 16px to match SQUARE in script.js. That 16 comes from the
+   checkerboard's actual rendered size (136px wrap minus the 4px border on
+   each side = 128px interior, since box-sizing:border-box + inset:0 sizes
+   .mini-chess-board to the wrap's padding box, not its full border-box) —
+   NOT from 136 / 8. Sizing this off the wrap's outer dimension instead of
+   the true interior is what caused pieces to drift from their squares. */
 .mini-chess-piece{
-  position: absolute; width: 16.5px; height: 16.5px;
+  position: absolute; width: 16px; height: 16px;
   display: flex; align-items: center; justify-content: center;
   transition: left 620ms cubic-bezier(.4,0,.2,1), top 620ms cubic-bezier(.4,0,.2,1),
               transform 620ms cubic-bezier(.4,0,.2,1), opacity 300ms ease;
 }
 .mini-chess-piece img{ width:84%; height:84%; object-fit:contain; image-rendering:pixelated; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 .mini-chess-piece.captured{ transform: scale(0.82); opacity: .82; }
+
+/* Overlays the board once the replay finishes. Sized/positioned to match
+   .mini-chess-board-wrap exactly so it reads as one control over the board,
+   not a floating extra element. */
+.mini-chess-replay{
+  position: absolute; left: 40px; top: 0;
+  width: 136px; height: 136px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 1px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  font-family: 'DotGothic16', monospace;
+  font-size: 11px; letter-spacing: .08em; color: var(--ink);
+  cursor: pointer;
+  opacity: 0; pointer-events: none;
+  transition: opacity 240ms ease, color 150ms ease;
+  z-index: 3;
+}
+.mini-chess-replay.show{ opacity: 1; pointer-events: auto; }
+.mini-chess-replay:hover, .mini-chess-replay:focus-visible{ color: var(--red); }
 
 @media (max-width: 1180px){
   .mini-chess-scene{ display: none; }
