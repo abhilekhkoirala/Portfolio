@@ -126,7 +126,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
    ============================================================ */
 .hero{ padding: 128px 0 0; position: relative; }
 .glyph-strip{
-  display:grid; grid-template-columns: repeat(24, 1fr); gap: 6px;
+  display:grid; grid-template-columns: repeat(27, 1fr); gap: 6px;
   max-width: 480px; margin: 0 0 40px; cursor: pointer;
 }
 .glyph-strip span{ width:100%; aspect-ratio:1; border-radius: 50%; background: var(--dot); transition: background var(--speed) ease; }
@@ -514,7 +514,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 
 @media (max-width: 520px){
   .hero{ padding-top: 108px; }
-  .glyph-strip{ grid-template-columns: repeat(18, 1fr); max-width: 100%; }
+  .glyph-strip{ max-width: 100%; }
   .section{ padding: 64px 0; }
   .edu-card{ padding: 22px; }
 }
