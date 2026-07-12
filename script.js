@@ -90,7 +90,14 @@ function initGlyphStrip(){
     });
   }
 
-  playSequence();
+  // Play the same gray → lit reveal used on click, but timed to start right
+  // as the boot overlay finishes clearing (see initBoot's total*28+500 ≈
+  // 1256ms, and initCube's matching AUTO_SHUFFLE_DELAY) — otherwise this
+  // ran immediately at DOMContentLoaded and finished playing out *behind*
+  // the still-visible overlay, so it was never actually seen happening.
+  const INITIAL_PLAY_DELAY = 1300;
+  setTimeout(playSequence, reduced ? 0 : INITIAL_PLAY_DELAY);
+
   strip.addEventListener('click', playSequence);
   strip.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playSequence(); }
