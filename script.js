@@ -30,6 +30,7 @@ const MANUAL_PROJECTS = [
 document.addEventListener('DOMContentLoaded', () => {
   initBoot();
   initGlyphStrip();
+  initWelcomeDots();
   initCube();
   initMiniChess();
   initNav();
@@ -67,6 +68,57 @@ function initBoot(){
   });
 
   setTimeout(() => boot.classList.add('hidden'), total * 28 + 500);
+}
+
+/* ---------------- hero WELCOME dot-matrix ----------------
+   A simple 5-wide x 7-tall dot-matrix font, just enough letters to
+   spell WELCOME. Every cell renders as a dot — black by default,
+   red wherever the letter's bitmap has a 1 — so the whole strip
+   reads as "a line of black and red dots" with the red ones
+   forming the word. */
+const FONT_5X7 = {
+  W: ['10001','10001','10001','10101','10101','11011','10001'],
+  E: ['11111','10000','10000','11110','10000','10000','11111'],
+  L: ['10000','10000','10000','10000','10000','10000','11111'],
+  C: ['01111','10000','10000','10000','10000','10000','01111'],
+  O: ['01110','10001','10001','10001','10001','10001','01110'],
+  M: ['10001','11011','10101','10101','10001','10001','10001'],
+};
+
+function initWelcomeDots(){
+  const el = document.getElementById('welcomeDots');
+  if(!el) return;
+
+  const WORD = 'WELCOME';
+  const ROWS = 7;
+  const LETTER_GAP = 1; // blank column between letters
+
+  const letters = WORD.split('').filter(ch => FONT_5X7[ch]);
+  const totalCols = letters.length * 5 + LETTER_GAP * (letters.length - 1);
+
+  // ROWS x totalCols grid of booleans; true = red (part of a letter)
+  const grid = Array.from({ length: ROWS }, () => new Array(totalCols).fill(false));
+  let col = 0;
+  letters.forEach(ch => {
+    const glyph = FONT_5X7[ch];
+    for(let r = 0; r < ROWS; r++){
+      for(let c = 0; c < 5; c++){
+        if(glyph[r][c] === '1') grid[r][col + c] = true;
+      }
+    }
+    col += 5 + LETTER_GAP;
+  });
+
+  el.style.gridTemplateColumns = `repeat(${totalCols}, var(--wd-size))`;
+  el.style.gridTemplateRows = `repeat(${ROWS}, var(--wd-size))`;
+  el.innerHTML = '';
+  for(let r = 0; r < ROWS; r++){
+    for(let c = 0; c < totalCols; c++){
+      const d = document.createElement('span');
+      d.className = grid[r][c] ? 'dot red' : 'dot';
+      el.appendChild(d);
+    }
+  }
 }
 
 /* ---------------- hero glyph strip ---------------- */
@@ -1054,6 +1106,7 @@ function squareToRowCol(sq){
    .mini-chess-piece actually gets to animate it.
    ============================================================ */
 function initMiniChess(){
+  const sceneEl = document.getElementById('miniChessScene');
   const boardEl = document.getElementById('miniChessBoard');
   const layerEl = document.getElementById('miniChessLayer');
   if(!boardEl || !layerEl) return;
@@ -1219,6 +1272,30 @@ function initMiniChess(){
     timer = setTimeout(tick, MOVE_INTERVAL);
   }
 
-  setupGame();
-  timer = setTimeout(tick, MOVE_INTERVAL);
+  setupGame(); // render the starting position immediately; playback waits for scroll
+
+  let started = false;
+  function startPlaying(){
+    if(started) return;
+    started = true;
+    timer = setTimeout(tick, MOVE_INTERVAL);
+  }
+
+  // Fires once the widget crosses the vertical middle of the viewport —
+  // rootMargin shrinks the observed viewport to a single line at 50%,
+  // so "isIntersecting" only flips true right as the element reaches it.
+  // If the page loads already scrolled past that point, this fires immediately.
+  if(sceneEl && 'IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          startPlaying();
+          io.disconnect();
+        }
+      });
+    }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+    io.observe(sceneEl);
+  } else {
+    startPlaying(); // no IntersectionObserver support — fall back to immediate start
+  }
 }
