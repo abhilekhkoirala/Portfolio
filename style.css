@@ -227,6 +227,66 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
   .cube-scene{ display: none; }
 }
 
+/* ---------- pixel basketball (projects, top-right) ---------- */
+#projects{ position: relative; }
+.ball-scene{
+  --bpx: 4px;
+  position: absolute; top: 26px; right: 2%;
+  width: 150px; height: 108px;
+  pointer-events: none;
+  z-index: 2;
+}
+.hoop{ position: absolute; top: 4px; right: 0; width: 60px; }
+.hoop .backboard{
+  width: 34px; height: 24px; margin-left: 16px;
+  background: #eeece5; border: 2px solid #1b1b1b;
+}
+.hoop .rim{
+  width: 42px; height: 4px; margin: -2px 0 0 8px;
+  background: var(--red); border-radius: 1px;
+}
+.hoop .net{
+  width: 26px; height: 22px; margin: 0 0 0 15px;
+  background:
+    repeating-linear-gradient(115deg, #1b1b1b 0 1.5px, transparent 1.5px 6px),
+    repeating-linear-gradient(65deg, #1b1b1b 0 1.5px, transparent 1.5px 6px);
+  opacity: .6;
+  clip-path: polygon(8% 0, 92% 0, 76% 100%, 24% 100%);
+  transform-origin: top center;
+  animation: net-swish 3.2s ease infinite;
+}
+
+/* the ball sprite itself — a grid of tiny squares, same technique as the
+   cube's cubie faces, colored from the PATTERN array built in script.js */
+.pixel-ball{
+  position: absolute; left: 6px; top: 96px;
+  display: grid;
+  gap: 0;
+  animation: ball-shot 3.2s cubic-bezier(.33,0,.2,1) infinite;
+}
+.pixel-ball span{ width: var(--bpx); height: var(--bpx); background: transparent; }
+.pixel-ball span.fill{ background: var(--red); }
+.pixel-ball span.seam{ background: #1b1b1b; }
+
+@keyframes ball-shot{
+  0%   { left: 6px;   top: 96px; opacity: 1; transform: rotate(0deg); }
+  40%  { left: 60px;  top: 20px; opacity: 1; transform: rotate(200deg); }
+  68%  { left: 104px; top: 26px; opacity: 1; transform: rotate(300deg); }
+  78%  { left: 114px; top: 40px; opacity: 1; transform: rotate(340deg); }
+  84%  { left: 116px; top: 50px; opacity: 0; transform: rotate(360deg); }
+  99%  { left: 6px;   top: 96px; opacity: 0; transform: rotate(360deg); }
+  100% { left: 6px;   top: 96px; opacity: 1; transform: rotate(0deg); }
+}
+@keyframes net-swish{
+  0%, 76%  { transform: scaleY(1); }
+  80%      { transform: scaleY(1.18) translateY(2px); }
+  88%      { transform: scaleY(0.94); }
+  94%,100% { transform: scaleY(1); }
+}
+@media (max-width: 1180px){
+  .ball-scene{ display: none; }
+}
+
 .ticker{ border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; background: var(--bg-soft); }
 .ticker-track{
   display:flex; align-items:center; gap: 18px; white-space: nowrap;
