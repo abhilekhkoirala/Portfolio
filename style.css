@@ -133,7 +133,14 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 .glyph-strip span.lit{ background: var(--ink); }
 .glyph-strip span.lit.accent{ background: var(--red); }
 
-.eyebrow{ font-size: 12px; letter-spacing: .16em; color: var(--ink-soft); margin: 0 0 18px; }
+.welcome-dots{
+  display: grid;
+  gap: 2px;
+  margin: 0 0 22px;
+  --wd-size: 4px;
+}
+.welcome-dots .dot{ width: var(--wd-size); height: var(--wd-size); border-radius: 50%; background: var(--ink); }
+.welcome-dots .dot.red{ background: var(--red); }
 .hero-title{
   font-size: clamp(42px, 9vw, 96px);
   line-height: 0.98;
@@ -390,7 +397,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 
 /* white piece art sits a touch low in its square compared to black —
    nudge it up. Change the -2px below to taste (e.g. -3px, -4px). */
-.mini-chess-piece.white{ transform: translateY(-2px); }
+.mini-chess-piece.white{ transform: translateY(-6px); }
 .mini-chess-piece.white.captured{ transform: translateY(-2px) scale(0.82); opacity: .82; }
 
 @media (max-width: 1180px){
@@ -495,6 +502,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 @media (max-width: 520px){
   .hero{ padding-top: 108px; }
   .glyph-strip{ grid-template-columns: repeat(16, 1fr); max-width: 100%; }
+  .welcome-dots{ --wd-size: 3px; }
   .section{ padding: 64px 0; }
   .edu-card{ padding: 22px; }
 }
