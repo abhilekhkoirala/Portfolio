@@ -434,6 +434,49 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 .chess-move-san.empty:hover{ background: none; }
 
 /* ---------- education ---------- */
+#education{ position: relative; }
+
+/* mini chess (education, top-right) — decorative auto-playing replay of
+   the same featured game as the CHESS section, at a small scale, with no
+   controls. Captured pieces stack beside the board (white captured →
+   left, black captured → right) instead of just vanishing. All 32 piece
+   elements persist for the lifetime of the widget (even once captured)
+   so that left/top can be transitioned by the browser instead of
+   snapping — that's also what lets the end-of-game reset read as pieces
+   "flying" back to their start squares rather than an instant cut. */
+.mini-chess-scene{
+  position: absolute; top: 24px; right: 3%;
+  width: 212px; height: 132px;
+  pointer-events: none;
+  z-index: 2;
+}
+.mini-chess-board-wrap{
+  position: absolute; left: 40px; top: 0;
+  width: 132px; height: 132px;
+  border: 4px solid var(--chess-frame); border-radius: 1px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  overflow: hidden;
+}
+.mini-chess-board{
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: repeat(8,1fr); grid-template-rows: repeat(8,1fr);
+}
+.mini-chess-sq.light{ background: var(--chess-light); }
+.mini-chess-sq.dark{ background: var(--chess-dark); }
+
+.mini-chess-layer{ position: absolute; inset: 0; }
+.mini-chess-piece{
+  position: absolute; width: 14px; height: 14px;
+  transition: left 620ms cubic-bezier(.4,0,.2,1), top 620ms cubic-bezier(.4,0,.2,1),
+              transform 620ms cubic-bezier(.4,0,.2,1), opacity 300ms ease;
+}
+.mini-chess-piece img{ width:100%; height:100%; object-fit:contain; image-rendering:pixelated; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+.mini-chess-piece.captured{ transform: scale(0.82); opacity: .82; }
+
+@media (max-width: 1180px){
+  .mini-chess-scene{ display: none; }
+}
+
 .edu-card{ border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; background: var(--bg); position: relative; }
 .edu-card::before, .edu-card::after{
   content:'+'; position:absolute; color: var(--ink-soft); font-size: 14px; line-height:1;
