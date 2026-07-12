@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initBoot();
   initGlyphStrip();
   initCube();
-  initChess();
   initMiniChess();
   initNav();
   initScrollspy();
@@ -1039,195 +1038,6 @@ function squareToRowCol(sq){
   return { row: 8 - rank, col: file };
 }
 
-function initChess(){
-  const frameEl = document.getElementById('chessFrame');
-  const boardEl = document.getElementById('chessBoard');
-  const piecesEl = document.getElementById('chessPieces');
-  const moveListEl = document.getElementById('chessMoveList');
-  const statusEl = document.getElementById('chessStatus');
-  if(!boardEl || !piecesEl || !moveListEl || !statusEl) return;
-
-  const files = ['a','b','c','d','e','f','g','h'];
-
-  // build 64 squares
-  for(let row = 0; row < 8; row++){
-    for(let col = 0; col < 8; col++){
-      const rank = 8 - row;
-      const sq = files[col] + rank;
-      const div = document.createElement('div');
-      div.className = 'chess-sq ' + (((col + rank) % 2 === 0) ? 'light' : 'dark');
-      div.dataset.square = sq;
-      boardEl.appendChild(div);
-    }
-  }
-
-  // build move list
-  let rows = '';
-  for(let i = 0; i < CHESS_GAME.length; i += 2){
-    const num = i / 2 + 1;
-    const w = CHESS_GAME[i];
-    const b = CHESS_GAME[i + 1];
-    rows += `<li>
-      <span class="chess-move-num">${num}.</span>
-      <span class="chess-move-san" data-ply="${i + 1}">${w.san}</span>
-      <span class="chess-move-san ${b ? '' : 'empty'}" ${b ? `data-ply="${i + 2}"` : ''}>${b ? b.san : ''}</span>
-    </li>`;
-  }
-  moveListEl.innerHTML = rows;
-
-  const firstBtn = document.getElementById('chessFirst');
-  const prevBtn  = document.getElementById('chessPrev');
-  const nextBtn  = document.getElementById('chessNext');
-  const lastBtn  = document.getElementById('chessLast');
-  const playBtn  = document.getElementById('chessPlay');
-
-  let currentPly = 0;
-  let autoplayTimer = null;
-
-  function pieceImgSrc(color, piece){
-    return `${CONFIG.CHESS_PIECE_PATH}${color}_${piece}.png`;
-  }
-
-  function computeBoardState(ply){
-    const state = {};
-    Object.keys(CHESS_START).forEach(sq => {
-      state[sq] = { color: CHESS_START[sq][0], piece: CHESS_START[sq][1] };
-    });
-    for(let i = 0; i < ply; i++){
-      const m = CHESS_GAME[i];
-      if(m.capturedSquare) delete state[m.capturedSquare];
-      const moving = state[m.from];
-      delete state[m.from];
-      state[m.to] = { color: m.color, piece: m.promotion || (moving ? moving.piece : m.piece) };
-      if(m.castle){
-        const rank = m.color === 'white' ? 1 : 8;
-        if(m.castle === 'king'){
-          const rook = state[`h${rank}`];
-          delete state[`h${rank}`];
-          state[`f${rank}`] = rook;
-        } else {
-          const rook = state[`a${rank}`];
-          delete state[`a${rank}`];
-          state[`d${rank}`] = rook;
-        }
-      }
-    }
-    return state;
-  }
-
-  function render(){
-    const state = computeBoardState(currentPly);
-
-    piecesEl.innerHTML = '';
-    Object.keys(state).forEach(sq => {
-      const { row, col } = squareToRowCol(sq);
-      const { color, piece } = state[sq];
-      const wrap = document.createElement('div');
-      wrap.className = 'chess-piece';
-      wrap.style.left = (col * 12.5) + '%';
-      wrap.style.top = (row * 12.5) + '%';
-      const img = document.createElement('img');
-      img.src = pieceImgSrc(color, piece);
-      img.alt = `${color} ${piece}`;
-      img.loading = 'lazy';
-      img.draggable = false;
-      wrap.appendChild(img);
-      piecesEl.appendChild(wrap);
-    });
-
-    boardEl.querySelectorAll('.chess-sq').forEach(s => {
-      s.classList.remove('hl');
-      s.classList.remove('check');
-    });
-
-    if(currentPly > 0){
-      const m = CHESS_GAME[currentPly - 1];
-      const fromEl = boardEl.querySelector(`[data-square="${m.from}"]`);
-      const toEl = boardEl.querySelector(`[data-square="${m.to}"]`);
-      if(fromEl) fromEl.classList.add('hl');
-      if(toEl) toEl.classList.add('hl');
-
-      if(m.castle){
-        const rank = m.color === 'white' ? 1 : 8;
-        const rookFrom = m.castle === 'king' ? `h${rank}` : `a${rank}`;
-        const rookTo = m.castle === 'king' ? `f${rank}` : `d${rank}`;
-        [rookFrom, rookTo].forEach(sq => {
-          const el = boardEl.querySelector(`[data-square="${sq}"]`);
-          if(el) el.classList.add('hl');
-        });
-      }
-
-      if(m.check || m.checkmate){
-        const oppColor = m.color === 'white' ? 'black' : 'white';
-        const kingSq = Object.keys(state).find(sq => state[sq].color === oppColor && state[sq].piece === 'king');
-        const kEl = kingSq && boardEl.querySelector(`[data-square="${kingSq}"]`);
-        if(kEl) kEl.classList.add('check');
-      }
-    }
-
-    moveListEl.querySelectorAll('.chess-move-san').forEach(el => {
-      el.classList.toggle('active', Number(el.dataset.ply) === currentPly);
-    });
-    const activeEl = moveListEl.querySelector('.chess-move-san.active');
-    if(activeEl) activeEl.scrollIntoView({ block: 'nearest' });
-
-    if(currentPly === 0){
-      statusEl.textContent = 'START — press ▶ to play through the game';
-    } else {
-      const m = CHESS_GAME[currentPly - 1];
-      const moveNum = Math.ceil(currentPly / 2);
-      const label = `${moveNum}${m.color === 'white' ? '.' : '...'} ${m.san}`;
-      statusEl.textContent = (currentPly === CHESS_GAME.length) ? `${label}  —  1–0, White wins` : label;
-    }
-
-    firstBtn.disabled = prevBtn.disabled = (currentPly === 0);
-    lastBtn.disabled = nextBtn.disabled = (currentPly === CHESS_GAME.length);
-  }
-
-  function stopAutoplay(){
-    if(autoplayTimer){
-      clearInterval(autoplayTimer);
-      autoplayTimer = null;
-      playBtn.textContent = '▶ PLAY';
-    }
-  }
-
-  function goTo(ply){
-    currentPly = Math.max(0, Math.min(CHESS_GAME.length, ply));
-    render();
-  }
-
-  firstBtn.addEventListener('click', () => { stopAutoplay(); goTo(0); });
-  prevBtn.addEventListener('click',  () => { stopAutoplay(); goTo(currentPly - 1); });
-  nextBtn.addEventListener('click',  () => { stopAutoplay(); goTo(currentPly + 1); });
-  lastBtn.addEventListener('click',  () => { stopAutoplay(); goTo(CHESS_GAME.length); });
-
-  playBtn.addEventListener('click', () => {
-    if(autoplayTimer){ stopAutoplay(); return; }
-    if(currentPly >= CHESS_GAME.length) goTo(0);
-    playBtn.textContent = '❚❚ PAUSE';
-    autoplayTimer = setInterval(() => {
-      if(currentPly >= CHESS_GAME.length){ stopAutoplay(); return; }
-      goTo(currentPly + 1);
-    }, 900);
-  });
-
-  moveListEl.addEventListener('click', (e) => {
-    const t = e.target.closest('.chess-move-san');
-    if(!t || !t.dataset.ply) return;
-    stopAutoplay();
-    goTo(Number(t.dataset.ply));
-  });
-
-  if(frameEl){
-    frameEl.addEventListener('keydown', (e) => {
-      if(e.key === 'ArrowRight'){ e.preventDefault(); stopAutoplay(); goTo(currentPly + 1); }
-      if(e.key === 'ArrowLeft'){ e.preventDefault(); stopAutoplay(); goTo(currentPly - 1); }
-    });
-  }
-
-  render();
-}
 
 /* ============================================================
    MINI CHESS — decorative auto-playing replay (education section)
@@ -1321,7 +1131,7 @@ function initMiniChess(){
     trackers = Object.keys(CHESS_START).map(sq => {
       const [color, piece] = CHESS_START[sq];
       const el = document.createElement('div');
-      el.className = 'mini-chess-piece';
+      el.className = `mini-chess-piece ${color}`;
       const img = document.createElement('img');
       img.alt = '';
       img.draggable = false;
