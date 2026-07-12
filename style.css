@@ -291,13 +291,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
   animation: ball-shot 3.2s cubic-bezier(.33,0,.2,1) infinite;
 }
 @keyframes ball-shot{
-  0%,38% { left: 40px;  top: 85px; opacity: 0; transform: rotate(0deg); }
-  39%    { left: 40px;  top: 85px; opacity: 1; transform: rotate(0deg); }
-  50%    { left: 90px;  top: -5px; opacity: 1; transform: rotate(120deg); }
-  68%    { left: 150px; top: 5px;  opacity: 1; transform: rotate(220deg); }
-  80%    { left: 190px; top: 28px; opacity: 1; transform: rotate(300deg); }
-  88%    { left: 196px; top: 46px; opacity: 0; transform: rotate(360deg); }
-  100%   { left: 40px;  top: 85px; opacity: 0; transform: rotate(360deg); }
+  0%,100% { left: 40px;  top: 85px; opacity: 0; transform: rotate(360deg); }
 }
 @keyframes net-swish{
   0%, 76%  { transform: scaleY(1); }
