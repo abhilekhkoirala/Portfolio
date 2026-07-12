@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abhilekh Koirala — (AK.01)</title>
+<meta name="description" content="Abhilekh Koirala — Aerospace Science &amp; Earth Informatics / Electrical &amp; Computer Engineering, CUHK. Portfolio.">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' fill='white'/%3E%3Ccircle cx='4' cy='4' r='2' fill='black'/%3E%3Ccircle cx='10' cy='4' r='2' fill='black'/%3E%3Ccircle cx='16' cy='4' r='2' fill='%23d7261e'/%3E%3Ccircle cx='4' cy='10' r='2' fill='black'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23d7261e'/%3E%3Ccircle cx='16' cy='10' r='2' fill='black'/%3E%3Ccircle cx='4' cy='16' r='2' fill='%23d7261e'/%3E%3Ccircle cx='10' cy='16' r='2' fill='black'/%3E%3Ccircle cx='16' cy='16' r='2' fill='black'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ BOOT OVERLAY ============ -->
+<div id="boot" class="boot" aria-hidden="true">
+  <div class="boot-grid" id="bootGrid"></div>
+  <div class="boot-label">LOADING_AK.PROFILE</div>
+</div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#home" class="brand" aria-label="Home">
+      <span class="brand-mark">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot red"></span><span class="dot"></span>
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </span>
+      <span class="brand-text">AK<span class="red">_</span>01</span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#about" data-nav>ABOUT</a>
+      <a href="#education" data-nav>EDUCATION</a>
+      <a href="#experience" data-nav>EXPERIENCE</a>
+      <a href="#projects" data-nav>PROJECTS</a>
+      <a href="#skills" data-nav>SKILLS</a>
+      <a href="#contact" data-nav>CONTACT</a>
+    </nav>
+
+    <div class="nav-controls">
+      <button class="theme-switch" id="themeSwitch" aria-label="Toggle dark mode" aria-pressed="false">
+        <span class="switch-track"><span class="switch-knob"></span></span>
+        <span class="switch-label">LIGHT</span>
+      </button>
+      <button class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MOBILE MENU ============ -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" data-nav>01 / ABOUT</a>
+  <a href="#education" data-nav>02 / EDUCATION</a>
+  <a href="#experience" data-nav>03 / EXPERIENCE</a>
+  <a href="#projects" data-nav>04 / PROJECTS</a>
+  <a href="#skills" data-nav>05 / SKILLS</a>
+  <a href="#contact" data-nav>06 / CONTACT</a>
+</div>
+
+<main id="home">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="container">
+      <div class="glyph-strip" id="glyphStrip" role="button" tabindex="0" aria-label="Replay boot animation"></div>
+
+      <p class="eyebrow reveal">MODEL — AK.STUDENT&nbsp;&nbsp;/&nbsp;&nbsp;STATUS — <span class="red">ONLINE</span></p>
+      <h1 class="hero-title reveal">
+        ABHILEKH<br>KOIRALA<span class="cursor">_</span>
+      </h1>
+      <p class="hero-sub reveal">
+        Aerospace Science &amp; Earth Informatics × Electrical &amp; Computer Engineering.
+        Building at the intersection of flight, data, and code.
+      </p>
+
+      <div class="hero-actions reveal">
+        <a href="#projects" class="btn btn-primary">VIEW WORK →</a>
+        <a href="#contact" class="btn btn-ghost">CONTACT</a>
+        <a href="assets/Resume_AK.pdf" class="btn btn-ghost" download>↓ RESUME.PDF</a>
+      </div>
+    </div>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track" id="tickerTrack">
+        <!-- duplicated in JS for seamless loop -->
+        <span>CUHK ’28</span><span class="sep">◆</span>
+        <span>AEROSPACE SCI. + ECE</span><span class="sep">◆</span>
+        <span>HONG KONG</span><span class="sep">◆</span>
+        <span>OPEN TO INTERNSHIPS</span><span class="sep">◆</span>
+        <span>QUANT × ML × SYSTEMS</span><span class="sep">◆</span>
+        <span>NEPAL → HONG KONG</span><span class="sep">◆</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 01</span>
+        <h2>ABOUT</h2>
+      </div>
+      <div class="about-grid">
+        <p class="about-text reveal">
+          I'm a second-year student at The Chinese University of Hong Kong, reading a dual
+          degree in <strong>Aerospace Science &amp; Earth Informatics</strong> and
+          <strong>Electrical &amp; Computer Engineering</strong>. I like working where hardware,
+          data, and code overlap — from neutron-scattering pipelines to trading systems to
+          geospatial analysis. Originally from Nepal, currently based in Hong Kong.
+        </p>
+        <dl class="about-facts reveal">
+          <div><dt>BASED IN</dt><dd>Hong Kong</dd></div>
+          <div><dt>ROOTS</dt><dd>Nepal</dd></div>
+          <div><dt>READING</dt><dd>Aerospace Sci. + ECE</dd></div>
+          <div><dt>GRAD.</dt><dd>May 2028</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EDUCATION ============ -->
+  <section class="section alt" id="education">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 02</span>
+        <h2>EDUCATION</h2>
+      </div>
+
+      <div class="edu-card reveal">
+        <div class="edu-top">
+          <div>
+            <h3>The Chinese University of Hong Kong</h3>
+            <p class="muted">BSc Aerospace Science &amp; Earth Informatics · BEng Electrical &amp; Computer Engineering</p>
+          </div>
+          <span class="pill">SEPT 2024 — MAY 2028</span>
+        </div>
+
+        <div class="edu-block">
+          <p class="block-label">COURSEWORK</p>
+          <div class="chips">
+            <span class="chip">Computational Design and Automation</span>
+            <span class="chip">Urban Remote Sensing</span>
+            <span class="chip">Linear Algebra</span>
+            <span class="chip">Principles of Communication Systems</span>
+            <span class="chip">Classical Mechanics</span>
+            <span class="chip">Problem Solving by Programming</span>
+            <span class="chip">Signals and Systems</span>
+            <span class="chip">Thermodynamics</span>
+            <span class="chip">Principles and Application of GIS</span>
+            <span class="chip">Digital Logic and System</span>
+          </div>
+        </div>
+
+        <div class="edu-block">
+          <p class="block-label">AWARDS</p>
+          <div class="chips">
+            <span class="chip chip-red">Honors at Entrance</span>
+            <span class="chip chip-red">Admissions Scholarship</span>
+            <span class="chip chip-red">Diversity &amp; Inclusion Ambassador</span>
+            <span class="chip chip-red">Global Learning Citizen</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERIENCE ============ -->
+  <section class="section" id="experience">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 03</span>
+        <h2>EXPERIENCE</h2>
+      </div>
+
+      <div class="timeline">
+        <article class="tl-card reveal">
+          <div class="tl-meta">
+            <span class="pill">JUN 2023 — JAN 2024</span>
+            <span class="muted">Nepal</span>
+          </div>
+          <h3>Himalayan Circuit</h3>
+          <p class="role">Analyst</p>
+          <ul>
+            <li>Collected and analyzed hiking/trekking data to generate 3D maps of distance, elevation gain/loss, and optimal routes for 50+ trails.</li>
+            <li>Improved trekking route recommendations by 15%, optimizing traveler efficiency for terrain difficulty and environmental factors.</li>
+            <li>Built a dataset covering 100+ km of trekking routes, feeding predictive analytics on tourism trends.</li>
+            <li>Led carbon emissions analysis for travelers — findings presented at the United Nations Global Compact conference.</li>
+          </ul>
+        </article>
+
+        <article class="tl-card reveal">
+          <div class="tl-meta">
+            <span class="pill">JUN 2023 — MAR 2024</span>
+            <span class="muted">Nepal</span>
+          </div>
+          <h3>Volunteer Nepal National Group</h3>
+          <p class="role">Analytical Intern</p>
+          <ul>
+            <li>Automated volunteer data tracking with Google Apps Script and calendar integration, cutting manual data entry time by 40%.</li>
+            <li>Provided language support and city navigation for international volunteers.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS ============ -->
+  <section class="section alt" id="projects">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 04</span>
+        <h2>PROJECTS</h2>
+      </div>
+
+      <p class="block-label reveal">RESEARCH</p>
+      <div class="grid-cards">
+        <article class="p-card reveal">
+          <div class="p-card-top">
+            <h3>ML-Assisted Neutron Spectroscopy</h3>
+            <span class="pill">Quantum Magnets</span>
+          </div>
+          <p class="role">Research Assistant</p>
+          <ul>
+            <li>Built a Python pipeline converting proprietary HORACE <code>.sqw</code> files into NumPy arrays for the data slicer, enabling ML-assisted analysis workflows.</li>
+            <li>Contributed to a machine-learning-assisted neutron spectroscopy study of quantum magnets — data preprocessing and spectral analysis.</li>
+            <li>Assisted neutron spectroscopy experiments on ferrous-oxide samples, hands-on with scientific instrumentation.</li>
+          </ul>
+        </article>
+
+        <article class="p-card reveal">
+          <div class="p-card-top">
+            <h3>Semantic Inconsistency in NLP</h3>
+            <span class="pill">CUHK · MAR 2026 – OCT 2026</span>
+          </div>
+          <p class="role">Research Assistant</p>
+          <ul>
+            <li>Researched methods to minimize semantic inconsistency for unstructured prompts.</li>
+            <li>Applied one-hot encoding to convert categorical variables into numerical features, improving downstream classification accuracy.</li>
+          </ul>
+        </article>
+      </div>
+
+      <p class="block-label reveal" style="margin-top:3rem">CODE — LIVE FROM GITHUB</p>
+      <div id="repoStatus" class="repo-status reveal">GITHUB_USERNAME not set — showing placeholders. See README to connect your repos.</div>
+      <div class="grid-cards" id="repoGrid"><!-- populated by script.js --></div>
+    </div>
+  </section>
+
+  <!-- ============ SKILLS ============ -->
+  <section class="section" id="skills">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 05</span>
+        <h2>SKILLS</h2>
+      </div>
+
+      <div class="skills-grid">
+        <div class="skill-col reveal">
+          <p class="block-label">PROGRAMMING LANGUAGES</p>
+          <div class="chips">
+            <span class="chip">Python</span><span class="chip">C</span>
+            <span class="chip">Verilog</span><span class="chip">Flask</span>
+          </div>
+        </div>
+        <div class="skill-col reveal">
+          <p class="block-label">DATA &amp; AUTOMATION</p>
+          <div class="chips">
+            <span class="chip">Excel (V-Lookup)</span><span class="chip">SQL</span>
+            <span class="chip">Google Sheets</span><span class="chip">Fatmap / Strava</span>
+          </div>
+        </div>
+        <div class="skill-col reveal">
+          <p class="block-label">SOFTWARE &amp; PLATFORMS</p>
+          <div class="chips">
+            <span class="chip">SolidWorks</span><span class="chip">ENVI</span><span class="chip">ArcGIS</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="block-label reveal" style="margin-top:3rem">LANGUAGE PROFICIENCY</p>
+      <div class="meters reveal">
+        <div class="meter-row">
+          <span class="meter-label">English</span>
+          <span class="meter" data-level="10"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+          <span class="meter-val">Fluent</span>
+        </div>
+        <div class="meter-row">
+          <span class="meter-label">Nepali</span>
+          <span class="meter" data-level="10"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+          <span class="meter-val">Native</span>
+        </div>
+        <div class="meter-row">
+          <span class="meter-label">Hindi</span>
+          <span class="meter" data-level="8"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+          <span class="meter-val">Fluent</span>
+        </div>
+        <div class="meter-row">
+          <span class="meter-label">Urdu</span>
+          <span class="meter" data-level="5"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></span>
+          <span class="meter-val">Conversational</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LEADERSHIP ============ -->
+  <section class="section alt" id="leadership">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 06</span>
+        <h2>LEADERSHIP &amp; OTHER</h2>
+      </div>
+      <div class="grid-cards small">
+        <div class="mini-card reveal"><span class="dot-bullet"></span>South Asian Student Association — Treasurer</div>
+        <div class="mini-card reveal"><span class="dot-bullet"></span>Career Development Facilitation Scheme, United College</div>
+        <div class="mini-card reveal"><span class="dot-bullet"></span>Volunteer, Rural Nepal</div>
+        <div class="mini-card reveal"><span class="dot-bullet"></span>Built an AI voice detector</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="section contact" id="contact">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 07</span>
+        <h2>CONTACT</h2>
+      </div>
+
+      <p class="contact-lead reveal">Open to internships and collaborations — reach out.</p>
+
+      <div class="contact-grid reveal">
+        <button class="contact-item" id="emailBtn" data-email="kavilekh@gmail.com">
+          <span class="block-label">EMAIL</span>
+          <span class="contact-value">kavilekh@gmail.com</span>
+          <span class="contact-hint">CLICK TO COPY</span>
+        </button>
+
+        <a class="contact-item" href="tel:+85270413993">
+          <span class="block-label">PHONE</span>
+          <span class="contact-value">+852 7041 3993</span>
+          <span class="contact-hint">TAP TO CALL</span>
+        </a>
+
+        <a class="contact-item" href="#" id="githubLink" target="_blank" rel="noopener">
+          <span class="block-label">GITHUB</span>
+          <span class="contact-value">/your-username</span>
+          <span class="contact-hint">SET IN script.js</span>
+        </a>
+
+        <a class="contact-item" href="#" id="linkedinLink" target="_blank" rel="noopener">
+          <span class="block-label">LINKEDIN</span>
+          <span class="contact-value">/in/your-handle</span>
+          <span class="contact-hint">SET IN script.js</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span>© <span id="year"></span> ABHILEKH KOIRALA</span>
+    <span class="muted">BUILT WITH DOTS · HOSTED ON GITHUB PAGES</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast">COPIED_EMAIL_TO_CLIPBOARD</div>
+
+<script src="script.js"></script>
+</body>
+</html>
