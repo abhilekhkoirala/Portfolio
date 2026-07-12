@@ -334,7 +334,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
    ============================================================ */
 .section{ padding: 96px 0; }
 .section.alt{ background: color-mix(in srgb, var(--bg-soft) 60%, transparent); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.section-head{ display:flex; align-items:baseline; gap: 16px; margin-bottom: 44px; }
+.section-head{ display:flex; align-items:center; gap: 16px; margin-bottom: 44px; }
 .tag{ font-size: 11px; letter-spacing: .16em; color: var(--red); border: 1px dashed var(--red); padding: 3px 8px; border-radius: var(--radius); }
 .section-head h2{ font-size: clamp(26px, 4vw, 34px); }
 .block-label{ font-size: 11px; letter-spacing: .16em; color: var(--ink-soft); margin: 0 0 14px; }
