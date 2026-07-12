@@ -348,91 +348,6 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 .about-facts dt{ font-size: 10.5px; letter-spacing: .14em; color: var(--ink-soft); }
 .about-facts dd{ margin:0; font-family:'DotGothic16', monospace; font-size: 15px; }
 
-/* ---------- chess ---------- */
-.chess-wrap{ display:grid; grid-template-columns: minmax(320px, 460px) 1fr; gap: 44px; align-items:start; }
-
-.chess-frame{
-  border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
-  background: var(--bg); position: relative;
-}
-.chess-frame::before, .chess-frame::after{
-  content:'+'; position:absolute; color: var(--ink-soft); font-size: 14px; line-height:1;
-}
-.chess-frame::before{ top: 6px; left: 6px; }
-.chess-frame::after{ bottom: 6px; right: 6px; }
-.chess-frame:focus-visible{ outline: 2px dashed var(--red); outline-offset: 4px; }
-
-.chess-coords{ display:flex; font-size: 10px; letter-spacing: .06em; color: var(--ink-soft); user-select:none; }
-.chess-files{ justify-content: space-around; padding: 0 0 6px 26px; }
-.chess-files span{ width: 12.5%; text-align:center; }
-.chess-board-row{ display:flex; gap: 6px; }
-.chess-ranks{ flex-direction:column; justify-content: space-around; padding-right: 2px; width: 18px; }
-.chess-ranks span{ height: 12.5%; display:flex; align-items:center; }
-
-.chess-board-wrap{
-  position: relative; flex:1; aspect-ratio: 1;
-  border: 6px solid var(--chess-frame); border-radius: 1px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.10);
-}
-.chess-board{
-  position:absolute; inset:0;
-  display:grid; grid-template-columns: repeat(8,1fr); grid-template-rows: repeat(8,1fr);
-}
-.chess-sq{ position:relative; transition: background var(--speed) ease; }
-.chess-sq.light{ background: var(--chess-light); }
-.chess-sq.dark{ background: var(--chess-dark); }
-.chess-sq.hl.light{ background: color-mix(in srgb, var(--chess-light) 60%, var(--red) 40%); }
-.chess-sq.hl.dark{ background: color-mix(in srgb, var(--chess-dark) 60%, var(--red) 40%); }
-.chess-sq.check::after{
-  content:''; position:absolute; inset: 8%; border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--red); pointer-events:none;
-}
-
-.chess-pieces{ position:absolute; inset:0; pointer-events:none; }
-.chess-piece{
-  position:absolute; width: 12.5%; height: 12.5%;
-  display:flex; align-items:center; justify-content:center;
-  transition: left 320ms cubic-bezier(.4,0,.2,1), top 320ms cubic-bezier(.4,0,.2,1);
-}
-.chess-piece img{
-  width: 84%; height: 84%; object-fit: contain; image-rendering: pixelated;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.28));
-}
-
-.chess-controls{ display:flex; flex-wrap:wrap; gap: 8px; margin-top: 18px; align-items:center; }
-.chess-btn{
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .06em;
-  padding: 9px 14px; border: 1px solid var(--ink); border-radius: var(--radius);
-  background: var(--bg); color: var(--ink); cursor: pointer;
-  transition: background var(--speed) ease, color var(--speed) ease, transform var(--speed) ease;
-}
-.chess-btn:hover{ transform: translateY(-2px); }
-.chess-btn:disabled{ opacity: .32; cursor: not-allowed; transform: none; }
-.chess-btn-play{ background: var(--ink); color: var(--bg); min-width: 108px; }
-
-.chess-status{ margin: 14px 0 2px; font-size: 12.5px; min-height: 18px; }
-.chess-hint{ margin: 6px 0 0; font-size: 11px; }
-
-.chess-movelist{
-  list-style:none; margin:0; padding:0; border: 1px solid var(--line); border-radius: var(--radius);
-  max-height: 460px; overflow-y: auto; background: var(--bg);
-}
-.chess-movelist li{ display:grid; grid-template-columns: 34px 1fr 1fr; border-bottom: 1px solid var(--line); }
-.chess-movelist li:last-child{ border-bottom:none; }
-.chess-move-num{
-  padding: 8px 6px; color: var(--ink-soft); font-size: 11px;
-  display:flex; align-items:center; justify-content:flex-end; border-right: 1px solid var(--line);
-}
-.chess-move-san{
-  padding: 8px 10px; font-size: 12.5px; cursor:pointer; border-right: 1px solid var(--line);
-  transition: background var(--speed) ease, color var(--speed) ease;
-}
-.chess-move-san:last-child{ border-right:none; }
-.chess-move-san:hover{ background: var(--bg-soft); }
-.chess-move-san.active{ background: var(--ink); color: var(--bg); }
-.chess-move-san.empty{ cursor:default; }
-.chess-move-san.empty:hover{ background: none; }
-
 /* ---------- education ---------- */
 #education{ position: relative; }
 
@@ -472,6 +387,11 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 }
 .mini-chess-piece img{ width:100%; height:100%; object-fit:contain; image-rendering:pixelated; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 .mini-chess-piece.captured{ transform: scale(0.82); opacity: .82; }
+
+/* white piece art sits a touch low in its square compared to black —
+   nudge it up. Change the -2px below to taste (e.g. -3px, -4px). */
+.mini-chess-piece.white{ transform: translateY(-2px); }
+.mini-chess-piece.white.captured{ transform: translateY(-2px) scale(0.82); opacity: .82; }
 
 @media (max-width: 1180px){
   .mini-chess-scene{ display: none; }
@@ -570,8 +490,6 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
   .about-facts{ border-left:none; padding-left:0; border-top: 1px solid var(--line); padding-top: 20px; }
   .skills-grid{ grid-template-columns: 1fr; }
   .meter-row{ grid-template-columns: 70px 1fr 90px; gap: 10px; }
-  .chess-wrap{ grid-template-columns: 1fr; }
-  .chess-movelist{ max-height: 260px; }
 }
 
 @media (max-width: 520px){
@@ -579,8 +497,4 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
   .glyph-strip{ grid-template-columns: repeat(16, 1fr); max-width: 100%; }
   .section{ padding: 64px 0; }
   .edu-card{ padding: 22px; }
-  .chess-frame{ padding: 12px; }
-  .chess-ranks{ width: 14px; font-size: 9px; }
-  .chess-files{ padding-left: 20px; font-size: 9px; }
-  .chess-btn{ padding: 8px 11px; font-size: 11px; }
 }
