@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGlyphStrip();
   initCube();
   initTheme();
+  initBasketball();
   initNav();
   initScrollspy();
   initReveal();
@@ -249,6 +250,37 @@ function initCube(){
   if(!reduced){
     setTimeout(shuffle, AUTO_SHUFFLE_DELAY);
   }
+}
+
+/* ---------------- pixel basketball (projects, top-right) ----------------
+   A tiny pixel-art sprite built the same way as the cube's dot grids: a
+   flat pattern of 0/1/2 values turned into colored squares. 1 = ball fill,
+   2 = seam. The sprite then loops an arc (CSS keyframes) into the hoop
+   beside it, fading out on the "swish" and resetting for the next shot. */
+function initBasketball(){
+  const mount = document.getElementById('pixelBall');
+  if(!mount) return;
+
+  const SIZE = 7;
+  const PATTERN = [
+    0,1,1,1,1,1,0,
+    1,1,1,1,1,1,1,
+    1,1,1,2,1,1,1,
+    1,1,2,2,2,1,1,
+    1,1,1,2,1,1,1,
+    1,1,1,1,1,1,1,
+    0,1,1,1,1,1,0,
+  ];
+
+  mount.style.gridTemplateColumns = `repeat(${SIZE}, var(--bpx))`;
+  mount.style.gridTemplateRows = `repeat(${SIZE}, var(--bpx))`;
+
+  PATTERN.forEach(v => {
+    const s = document.createElement('span');
+    if(v === 1) s.className = 'fill';
+    else if(v === 2) s.className = 'seam';
+    mount.appendChild(s);
+  });
 }
 
 /* ---------------- theme toggle ---------------- */
