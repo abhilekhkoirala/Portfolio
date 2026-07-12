@@ -184,7 +184,6 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
   transform-style: preserve-3d;
   animation: cube-spin 16s linear infinite;
 }
-.cube-scene.shuffling .cube{ animation-play-state: paused; }
 @keyframes cube-spin{
   from{ transform: rotateX(-20deg) rotateY(0deg); }
   to{ transform: rotateX(-20deg) rotateY(360deg); }
