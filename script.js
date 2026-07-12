@@ -70,9 +70,47 @@ function initBoot(){
 }
 
 /* ---------------- hero glyph strip ---------------- */
+// Tiny 3-row-tall pixel font — just enough letters to spell "WELCOME".
+// Each letter is 3 rows × 3 cols, 'X' = lit. At only 3 rows tall these are
+// necessarily abstracted (a real legible font needs ~5 rows), so treat
+// them as a stylized dot-matrix impression of the word rather than a
+// crisp typeface — add more letters here the same way if you want other
+// words later.
+const GLYPH_FONT_3ROW = {
+  W: ['X.X', 'X.X', '.X.'],
+  E: ['XXX', 'XX.', 'XXX'],
+  L: ['X..', 'X..', 'XXX'],
+  C: ['.XX', 'X..', '.XX'],
+  O: ['XXX', 'X.X', 'XXX'],
+  M: ['X.X', 'XXX', 'X.X'],
+};
+const GLYPH_LETTER_GAP = 1; // blank columns between letters so strokes don't bleed together
+
+// Builds a 3-row boolean grid for a word from GLYPH_FONT_3ROW, with
+// GLYPH_LETTER_GAP blank columns between letters. Letters missing from the
+// font (or spaces) just render as a blank cell.
+function buildWordPattern(word){
+  const rows = [[], [], []];
+  const letters = [...word.toUpperCase()];
+  letters.forEach((ch, i) => {
+    const glyph = GLYPH_FONT_3ROW[ch];
+    if(glyph){
+      glyph.forEach((rowStr, r) => rows[r].push(...[...rowStr].map(c => c === 'X')));
+    } else {
+      for(let r = 0; r < 3; r++) rows[r].push(false, false, false);
+    }
+    if(i < letters.length - 1){
+      for(let r = 0; r < 3; r++) rows[r].push(...Array(GLYPH_LETTER_GAP).fill(false));
+    }
+  });
+  return rows; // rows[r][c] — boolean per row/column
+}
+
 function initGlyphStrip(){
   const strip = document.getElementById('glyphStrip');
-  const total = 72; // 24 cols x 3 rows — one more layer than the original 2-row grid
+  const COLS = 27; // "WELCOME": 7 letters × 3 cols + 6 gaps × 1 col = 27
+  const ROWS = 3;
+  const total = COLS * ROWS;
   for(let i=0;i<total;i++){
     const s = document.createElement('span');
     strip.appendChild(s);
@@ -80,8 +118,13 @@ function initGlyphStrip(){
   const dots = [...strip.children];
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function playSequence(){
+  function clearDots(){
     dots.forEach(d => d.classList.remove('lit','accent'));
+  }
+
+  // Random reveal — used on click / keyboard activation, same as before.
+  function playRandom(){
+    clearDots();
     dots.forEach((d, i) => {
       setTimeout(() => {
         d.classList.add('lit');
@@ -90,17 +133,31 @@ function initGlyphStrip(){
     });
   }
 
-  // Play the same gray → lit reveal used on click, but timed to start right
-  // as the boot overlay finishes clearing (see initBoot's total*28+500 ≈
-  // 1256ms, and initCube's matching AUTO_SHUFFLE_DELAY) — otherwise this
-  // ran immediately at DOMContentLoaded and finished playing out *behind*
-  // the still-visible overlay, so it was never actually seen happening.
-  const INITIAL_PLAY_DELAY = 1300;
-  setTimeout(playSequence, reduced ? 0 : INITIAL_PLAY_DELAY);
+  // Types WELCOME out column by column, terminal-boot style. Only used
+  // once, at load — every click/keypress after that goes back to playRandom.
+  function playWelcome(){
+    clearDots();
+    const pattern = buildWordPattern('WELCOME');
+    const cols = pattern[0].length; // 27, matching COLS — see buildWordPattern
+    for(let c = 0; c < cols; c++){
+      setTimeout(() => {
+        for(let r = 0; r < ROWS; r++){
+          if(pattern[r][c]) dots[r * COLS + c].classList.add('lit');
+        }
+      }, reduced ? 0 : c * 55);
+    }
+  }
 
-  strip.addEventListener('click', playSequence);
+  // Play the boot text, timed to start right as the boot overlay finishes
+  // clearing (see initBoot's total*28+500 ≈ 1256ms, and initCube's matching
+  // AUTO_SHUFFLE_DELAY) — otherwise it'd finish typing out behind the
+  // still-visible overlay and never actually be seen happening.
+  const INITIAL_PLAY_DELAY = 1300;
+  setTimeout(playWelcome, reduced ? 0 : INITIAL_PLAY_DELAY);
+
+  strip.addEventListener('click', playRandom);
   strip.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playSequence(); }
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playRandom(); }
   });
 }
 
