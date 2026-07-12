@@ -9,7 +9,6 @@ const CONFIG = {
   LINKEDIN_LABEL: "linkedin.com/abhilekhkoirala",      // what's displayed on the card, e.g. "linkedin.com/in/yourname" — leave "" to just show the URL above
   GITHUB_PROFILE_URL: "",  // optional override; defaults to github.com/<username>
 };
-
 // Manual fallback projects — edit freely, used when GITHUB_USERNAME is empty
 // or the GitHub API request fails (e.g. rate limit).
 const MANUAL_PROJECTS = [
@@ -30,6 +29,7 @@ const MANUAL_PROJECTS = [
 document.addEventListener('DOMContentLoaded', () => {
   initBoot();
   initGlyphStrip();
+  initCube();
   initTheme();
   initNav();
   initScrollspy();
@@ -93,6 +93,46 @@ function initGlyphStrip(){
   strip.addEventListener('click', playSequence);
   strip.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playSequence(); }
+  });
+}
+
+/* ---------------- rubik's cube (red / black / white) ---------------- */
+function initCube(){
+  const scene = document.getElementById('cubeScene');
+  if(!scene) return;
+
+  const faces = [...scene.querySelectorAll('.cube-face')]; // front, back, right, left, top, bottom
+
+  // a fixed "scrambled" starting pattern per face — 9 cells each, r/k/w
+  const START_PATTERN = [
+    ['r','k','w','k','r','k','w','k','r'],
+    ['k','w','r','w','k','w','r','w','k'],
+    ['w','r','k','r','w','r','k','r','w'],
+    ['k','k','r','w','r','w','r','k','k'],
+    ['r','w','k','k','k','w','w','r','r'],
+    ['w','k','r','r','w','k','k','r','w'],
+  ];
+
+  faces.forEach((face, fi) => {
+    face.innerHTML = '';
+    START_PATTERN[fi].forEach(color => {
+      const s = document.createElement('span');
+      s.className = `sticker ${color}`;
+      face.appendChild(s);
+    });
+  });
+
+  function shuffle(){
+    const palette = ['r', 'k', 'w'];
+    scene.querySelectorAll('.sticker').forEach(s => {
+      const next = palette[Math.floor(Math.random() * palette.length)];
+      s.className = `sticker ${next}`;
+    });
+  }
+
+  scene.addEventListener('click', shuffle);
+  scene.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); shuffle(); }
   });
 }
 
