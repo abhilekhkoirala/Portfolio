@@ -5,7 +5,8 @@
 const CONFIG = {
   GITHUB_USERNAME: "abhilekhkoirala",     // e.g. "abhilekh-koirala" — leave "" to show placeholders instead
   GITHUB_REPO_COUNT: 6,    // how many repos to show
-  LINKEDIN_URL: "https://www.linkedin.com/in/abhilekh-koirala-863028280/",        // e.g. "https://linkedin.com/in/your-handle"
+  LINKEDIN_URL: "https://www.linkedin.com/in/abhilekh-koirala-863028280/",        // full URL it links to, e.g. "https://www.linkedin.com/in/your-actual-slug-863028280/"
+  LINKEDIN_LABEL: "linkedin.com/abhilekhkoirala",      // what's displayed on the card, e.g. "linkedin.com/in/yourname" — leave "" to just show the URL above
   GITHUB_PROFILE_URL: "",  // optional override; defaults to github.com/<username>
 };
 
@@ -232,7 +233,8 @@ function initContact(){
   }
   if(CONFIG.LINKEDIN_URL){
     liLink.href = CONFIG.LINKEDIN_URL;
-    liLink.querySelector('.contact-value').textContent = CONFIG.LINKEDIN_URL.replace(/^https?:\/\/(www\.)?/, '');
+    const label = CONFIG.LINKEDIN_LABEL || CONFIG.LINKEDIN_URL.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+    liLink.querySelector('.contact-value').textContent = label;
     liLink.querySelector('.contact-hint').textContent = 'VIEW PROFILE';
   }
 }
