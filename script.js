@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initBoot();
   initGlyphStrip();
   initCube();
-  initTheme();
   initNav();
   initScrollspy();
   initReveal();
@@ -248,30 +247,6 @@ function initCube(){
   const AUTO_SHUFFLE_DELAY = 1300;
   if(!reduced){
     setTimeout(shuffle, AUTO_SHUFFLE_DELAY);
-  }
-}
-
-/* ---------------- theme toggle ---------------- */
-function initTheme(){
-  const root = document.documentElement;
-  const btn = document.getElementById('themeSwitch');
-  const label = btn.querySelector('.switch-label');
-  const saved = localStorage.getItem('ak-theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const theme = saved || (prefersDark ? 'dark' : 'light');
-
-  applyTheme(theme);
-
-  btn.addEventListener('click', () => {
-    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    localStorage.setItem('ak-theme', next);
-  });
-
-  function applyTheme(t){
-    root.setAttribute('data-theme', t);
-    btn.setAttribute('aria-pressed', String(t === 'dark'));
-    label.textContent = t.toUpperCase();
   }
 }
 
