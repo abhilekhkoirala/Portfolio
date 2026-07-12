@@ -36,6 +36,7 @@
 
     <nav class="nav-links" id="navLinks">
       <a href="#about" data-nav>ABOUT</a>
+      <a href="#chess" data-nav>CHESS</a>
       <a href="#education" data-nav>EDUCATION</a>
       <a href="#experience" data-nav>EXPERIENCE</a>
       <a href="#projects" data-nav>PROJECTS</a>
@@ -54,11 +55,12 @@
 <!-- ============ MOBILE MENU ============ -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="#about" data-nav>01 / ABOUT</a>
-  <a href="#education" data-nav>02 / EDUCATION</a>
-  <a href="#experience" data-nav>03 / EXPERIENCE</a>
-  <a href="#projects" data-nav>04 / PROJECTS</a>
-  <a href="#skills" data-nav>05 / SKILLS</a>
-  <a href="#contact" data-nav>06 / CONTACT</a>
+  <a href="#chess" data-nav>02 / CHESS</a>
+  <a href="#education" data-nav>03 / EDUCATION</a>
+  <a href="#experience" data-nav>04 / EXPERIENCE</a>
+  <a href="#projects" data-nav>05 / PROJECTS</a>
+  <a href="#skills" data-nav>06 / SKILLS</a>
+  <a href="#contact" data-nav>07 / CONTACT</a>
 </div>
 
 <main id="home">
@@ -126,11 +128,57 @@
     </div>
   </section>
 
+  <!-- ============ CHESS ============ -->
+  <section class="section" id="chess">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="tag">SPEC / 02</span>
+        <h2>CHESS</h2>
+      </div>
+
+      <p class="block-label reveal">FEATURED GAME · 47 PLY · WHITE WINS</p>
+
+      <div class="chess-wrap reveal">
+        <div class="chess-board-col">
+          <div class="chess-frame" id="chessFrame" tabindex="0" aria-label="Chess board, use left and right arrow keys to step through the game">
+            <div class="chess-coords chess-files" aria-hidden="true">
+              <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+            </div>
+            <div class="chess-board-row">
+              <div class="chess-coords chess-ranks" aria-hidden="true">
+                <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+              </div>
+              <div class="chess-board-wrap">
+                <div class="chess-board" id="chessBoard"></div>
+                <div class="chess-pieces" id="chessPieces"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chess-controls">
+            <button class="chess-btn" id="chessFirst" aria-label="Go to start">⏮</button>
+            <button class="chess-btn" id="chessPrev" aria-label="Previous move">◀</button>
+            <button class="chess-btn chess-btn-play" id="chessPlay">▶ PLAY</button>
+            <button class="chess-btn" id="chessNext" aria-label="Next move">▶</button>
+            <button class="chess-btn" id="chessLast" aria-label="Go to end">⏭</button>
+          </div>
+          <p class="chess-status" id="chessStatus">START — press ▶ to play through the game</p>
+          <p class="chess-hint muted">← → keys step through moves once the board is focused. Click any move in the list to jump there.</p>
+        </div>
+
+        <div class="chess-movelist-col">
+          <p class="block-label">MOVE LIST</p>
+          <ol class="chess-movelist" id="chessMoveList"></ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ EDUCATION ============ -->
   <section class="section alt" id="education">
     <div class="container">
       <div class="section-head reveal">
-        <span class="tag">SPEC / 02</span>
+        <span class="tag">SPEC / 03</span>
         <h2>EDUCATION</h2>
       </div>
 
@@ -176,7 +224,7 @@
   <section class="section" id="experience">
     <div class="container">
       <div class="section-head reveal">
-        <span class="tag">SPEC / 03</span>
+        <span class="tag">SPEC / 04</span>
         <h2>EXPERIENCE</h2>
       </div>
 
@@ -226,7 +274,7 @@
 
     <div class="container">
       <div class="section-head reveal">
-        <span class="tag">SPEC / 04</span>
+        <span class="tag">SPEC / 05</span>
         <h2>PROJECTS</h2>
       </div>
 
@@ -268,7 +316,7 @@
   <section class="section" id="skills">
     <div class="container">
       <div class="section-head reveal">
-        <span class="tag">SPEC / 05</span>
+        <span class="tag">SPEC / 06</span>
         <h2>SKILLS</h2>
       </div>
 
@@ -325,7 +373,7 @@
   <section class="section alt" id="leadership">
     <div class="container">
       <div class="section-head reveal">
-        <span class="tag">SPEC / 06</span>
+        <span class="tag">SPEC / 07</span>
         <h2>LEADERSHIP &amp; OTHER</h2>
       </div>
       <div class="grid-cards small">
@@ -341,7 +389,7 @@
   <section class="section contact" id="contact">
     <div class="container">
       <div class="section-head reveal">
-        <span class="tag">SPEC / 07</span>
+        <span class="tag">SPEC / 08</span>
         <h2>CONTACT</h2>
       </div>
 
