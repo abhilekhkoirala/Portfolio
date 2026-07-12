@@ -172,6 +172,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 /* ---------- rubik's cube (hero, top-right) ---------- */
 .cube-scene {
     --cube: 160px;
+    --cubie: 48px;
     position: absolute; top: 250px; right: 18%;
     width: var(--cube); height: var(--cube);
     perspective: 900px;
@@ -183,29 +184,41 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
   transform-style: preserve-3d;
   animation: cube-spin 16s linear infinite;
 }
+.cube-scene.shuffling .cube{ animation-play-state: paused; }
 @keyframes cube-spin{
   from{ transform: rotateX(-20deg) rotateY(0deg); }
   to{ transform: rotateX(-20deg) rotateY(360deg); }
 }
 
-.cube-face{
+/* an individual piece of the 3x3x3 — positioned via translate3d in JS,
+   turns get prepended onto its transform as the cube gets scrambled */
+.cubie{
+  position: absolute; top: 50%; left: 50%;
+  width: var(--cubie); height: var(--cubie);
+  margin: calc(var(--cubie) / -2) 0 0 calc(var(--cubie) / -2);
+  transform-style: preserve-3d;
+}
+.cubie-face{
   position: absolute; inset: 0;
-  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-  gap: 3px; padding: 3px;
-  background: var(--ink);
+  border-radius: 1.5px;
   box-shadow: 0 0 0 1px var(--ink);
 }
-.cube-face .sticker{ border-radius: 1px; transition: background-color 260ms ease; }
-.cube-face .sticker.k{ background: var(--ink); }
-.cube-face .sticker.r{ background: var(--red); }
-.cube-face .sticker.w{ background: var(--bg); box-shadow: inset 0 0 0 1px var(--ink); }
+.cubie-face.k{ background: var(--ink); }
+.cubie-face.r{ background: var(--red); }
+.cubie-face.w{ background: var(--bg); box-shadow: inset 0 0 0 1px var(--ink); }
 
-.cube-face.front{ transform: translateZ(calc(var(--cube) / 2)); }
-.cube-face.back{ transform: rotateY(180deg) translateZ(calc(var(--cube) / 2)); }
-.cube-face.right{ transform: rotateY(90deg) translateZ(calc(var(--cube) / 2)); }
-.cube-face.left{ transform: rotateY(-90deg) translateZ(calc(var(--cube) / 2)); }
-.cube-face.top{ transform: rotateX(90deg) translateZ(calc(var(--cube) / 2)); }
-.cube-face.bottom{ transform: rotateX(-90deg) translateZ(calc(var(--cube) / 2)); }
+.cubie-face.front{ transform: translateZ(calc(var(--cubie) / 2)); }
+.cubie-face.back{ transform: rotateY(180deg) translateZ(calc(var(--cubie) / 2)); }
+.cubie-face.right{ transform: rotateY(90deg) translateZ(calc(var(--cubie) / 2)); }
+.cubie-face.left{ transform: rotateY(-90deg) translateZ(calc(var(--cubie) / 2)); }
+.cubie-face.top{ transform: rotateX(90deg) translateZ(calc(var(--cubie) / 2)); }
+.cubie-face.bottom{ transform: rotateX(-90deg) translateZ(calc(var(--cubie) / 2)); }
+
+/* temporary parent used to animate one slab (layer) of 9 pieces turning together */
+.layer-group{
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+}
 
 @media (prefers-reduced-motion: reduce){
   .cube{ animation: none; transform: rotateX(-20deg) rotateY(28deg); }
