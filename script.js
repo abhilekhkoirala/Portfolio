@@ -141,9 +141,10 @@ function initGlyphStrip(){
     });
   }
 
-  // Types WELCOME out column by column, terminal-boot style, in red.
-  // Only used once, at load — every click/keypress after that goes back
-  // to playRandom (which stays black/mostly-black).
+  // Types WELCOME out column by column, terminal-boot style: every dot in
+  // the column lights up black, and the ones that form a letter go red on
+  // top of that — so the whole strip fills in black with red letters,
+  // rather than red letters floating on an otherwise-gray field.
   function playWelcome(){
     clearDots();
     const pattern = buildWordPattern('WELCOME');
@@ -151,7 +152,9 @@ function initGlyphStrip(){
     for(let c = 0; c < cols; c++){
       setTimeout(() => {
         for(let r = 0; r < ROWS; r++){
-          if(pattern[r][c]) dots[r * COLS + c].classList.add('lit', 'accent');
+          const dot = dots[r * COLS + c];
+          dot.classList.add('lit');
+          if(pattern[r][c]) dot.classList.add('accent');
         }
       }, reduced ? 0 : c * 55);
     }
