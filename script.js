@@ -30,7 +30,6 @@ const MANUAL_PROJECTS = [
 document.addEventListener('DOMContentLoaded', () => {
   initBoot();
   initGlyphStrip();
-  initWelcomeDots();
   initCube();
   initMiniChess();
   initNav();
@@ -70,61 +69,10 @@ function initBoot(){
   setTimeout(() => boot.classList.add('hidden'), total * 28 + 500);
 }
 
-/* ---------------- hero WELCOME dot-matrix ----------------
-   A simple 5-wide x 7-tall dot-matrix font, just enough letters to
-   spell WELCOME. Every cell renders as a dot — black by default,
-   red wherever the letter's bitmap has a 1 — so the whole strip
-   reads as "a line of black and red dots" with the red ones
-   forming the word. */
-const FONT_5X7 = {
-  W: ['10001','10001','10001','10101','10101','11011','10001'],
-  E: ['11111','10000','10000','11110','10000','10000','11111'],
-  L: ['10000','10000','10000','10000','10000','10000','11111'],
-  C: ['01111','10000','10000','10000','10000','10000','01111'],
-  O: ['01110','10001','10001','10001','10001','10001','01110'],
-  M: ['10001','11011','10101','10101','10001','10001','10001'],
-};
-
-function initWelcomeDots(){
-  const el = document.getElementById('welcomeDots');
-  if(!el) return;
-
-  const WORD = 'WELCOME';
-  const ROWS = 7;
-  const LETTER_GAP = 1; // blank column between letters
-
-  const letters = WORD.split('').filter(ch => FONT_5X7[ch]);
-  const totalCols = letters.length * 5 + LETTER_GAP * (letters.length - 1);
-
-  // ROWS x totalCols grid of booleans; true = red (part of a letter)
-  const grid = Array.from({ length: ROWS }, () => new Array(totalCols).fill(false));
-  let col = 0;
-  letters.forEach(ch => {
-    const glyph = FONT_5X7[ch];
-    for(let r = 0; r < ROWS; r++){
-      for(let c = 0; c < 5; c++){
-        if(glyph[r][c] === '1') grid[r][col + c] = true;
-      }
-    }
-    col += 5 + LETTER_GAP;
-  });
-
-  el.style.gridTemplateColumns = `repeat(${totalCols}, var(--wd-size))`;
-  el.style.gridTemplateRows = `repeat(${ROWS}, var(--wd-size))`;
-  el.innerHTML = '';
-  for(let r = 0; r < ROWS; r++){
-    for(let c = 0; c < totalCols; c++){
-      const d = document.createElement('span');
-      d.className = grid[r][c] ? 'dot red' : 'dot';
-      el.appendChild(d);
-    }
-  }
-}
-
 /* ---------------- hero glyph strip ---------------- */
 function initGlyphStrip(){
   const strip = document.getElementById('glyphStrip');
-  const total = 48;
+  const total = 72; // 24 cols x 3 rows — one more layer than the original 2-row grid
   for(let i=0;i<total;i++){
     const s = document.createElement('span');
     strip.appendChild(s);
@@ -1116,9 +1064,6 @@ function initMiniChess(){
   const BOARD_SIZE = 132;
   const SQUARE = BOARD_SIZE / 8;
   const BOARD_X = 40;          // left stack (34px) + gap (6px)
-  const PIECE_BOX = 14;
-  const STACK_COL_W = 17;
-  const STACK_ROW_H = SQUARE;  // 8 rows fit exactly in the board's height
 
   const MOVE_INTERVAL = 1100;  // ms between plies while playing
   const END_PAUSE = 1800;      // ms to hold the final position before resetting
@@ -1139,12 +1084,14 @@ function initMiniChess(){
     return `${CONFIG.CHESS_PIECE_PATH}${color}_${piece}.png`;
   }
 
+  // Every piece box is exactly one SQUARE, positioned at the cell's
+  // top-left corner — no manual half-offset math. Centering the piece
+  // artwork inside that box is CSS's job (see .mini-chess-piece
+  // display:flex + its img rule), so it's automatically correct
+  // regardless of piece color or image proportions.
   function squareCoord(sq){
     const { row, col } = squareToRowCol(sq);
-    return {
-      left: BOARD_X + col * SQUARE + (SQUARE - PIECE_BOX) / 2,
-      top:  row * SQUARE + (SQUARE - PIECE_BOX) / 2,
-    };
+    return { left: BOARD_X + col * SQUARE, top: row * SQUARE };
   }
 
   // side: 'left' for captured white pieces, 'right' for captured black pieces
@@ -1152,9 +1099,9 @@ function initMiniChess(){
     const col = Math.floor(index / 8);
     const row = index % 8;
     const left = side === 'left'
-      ? (34 - STACK_COL_W * (col + 1)) + (STACK_COL_W - PIECE_BOX) / 2
-      : (BOARD_X + BOARD_SIZE + 6) + col * STACK_COL_W + (STACK_COL_W - PIECE_BOX) / 2;
-    const top = row * STACK_ROW_H + (STACK_ROW_H - PIECE_BOX) / 2;
+      ? (34 - SQUARE * (col + 1))
+      : (BOARD_X + BOARD_SIZE + 6) + col * SQUARE;
+    const top = row * SQUARE;
     return { left, top };
   }
 
