@@ -8,6 +8,7 @@ const CONFIG = {
   LINKEDIN_URL: "https://www.linkedin.com/in/abhilekh-koirala-863028280/",        // full URL it links to, e.g. "https://www.linkedin.com/in/your-actual-slug-863028280/"
   LINKEDIN_LABEL: "linkedin.com/abhilekhkoirala",      // what's displayed on the card, e.g. "linkedin.com/in/yourname" — leave "" to just show the URL above
   GITHUB_PROFILE_URL: "",  // optional override; defaults to github.com/<username>
+  CHESS_PIECE_PATH: "assets/chess/",  // folder holding piece images, named e.g. white_pawn.png, black_knight.png
 };
 // Manual fallback projects — edit freely, used when GITHUB_USERNAME is empty
 // or the GitHub API request fails (e.g. rate limit).
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBoot();
   initGlyphStrip();
   initCube();
+  initChess();
   initNav();
   initScrollspy();
   initReveal();
@@ -436,4 +438,792 @@ function escapeHtml(str){
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+
+/* ============================================================
+   CHESS — featured game viewer
+   Board renders from CHESS_START + CHESS_GAME (a full move-by-move
+   replay). Piece images are expected at:
+     CONFIG.CHESS_PIECE_PATH + "<color>_<piece>.png"
+   e.g. assets/chess/white_pawn.png, assets/chess/black_knight.png
+   (pawn / knight / bishop / rook / queen / king × white / black)
+   ============================================================ */
+const CHESS_START = {
+  a1:['white','rook'],   b1:['white','knight'], c1:['white','bishop'], d1:['white','queen'],
+  e1:['white','king'],   f1:['white','bishop'], g1:['white','knight'], h1:['white','rook'],
+  a2:['white','pawn'],   b2:['white','pawn'],   c2:['white','pawn'],   d2:['white','pawn'],
+  e2:['white','pawn'],   f2:['white','pawn'],   g2:['white','pawn'],   h2:['white','pawn'],
+  a7:['black','pawn'],   b7:['black','pawn'],   c7:['black','pawn'],   d7:['black','pawn'],
+  e7:['black','pawn'],   f7:['black','pawn'],   g7:['black','pawn'],   h7:['black','pawn'],
+  a8:['black','rook'],   b8:['black','knight'], c8:['black','bishop'], d8:['black','queen'],
+  e8:['black','king'],   f8:['black','bishop'], g8:['black','knight'], h8:['black','rook'],
+};
+
+// Full move list, pre-resolved (from/to squares, captures, castling, checks).
+// Game: 1.d4 Nf6 2.Nf3 g6 3.Bf4 Bg7 4.e3 O-O 5.c4 d6 6.Nc3 Nbd7 7.Bd3 c5 8.d5 Ng4
+// 9.O-O a6 10.e4 Rb8 11.a4 Re8 12.h3 Nge5 13.Nxe5 Nxe5 14.Bg3 Nxd3 15.Qxd3 f5
+// 16.exf5 Bxf5 17.Qe3 e5 18.dxe6 Rxe6 19.Qd2 Qd7 20.Rac1 Rbe8 21.Nd5 Re2 22.Qf4
+// Be5 23.Qxe5 dxe5 24.Nf6+ 1-0
+const CHESS_GAME = [
+  {
+    "san": "d4",
+    "color": "white",
+    "piece": "pawn",
+    "from": "d2",
+    "to": "d4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nf6",
+    "color": "black",
+    "piece": "knight",
+    "from": "g8",
+    "to": "f6",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nf3",
+    "color": "white",
+    "piece": "knight",
+    "from": "g1",
+    "to": "f3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "g6",
+    "color": "black",
+    "piece": "pawn",
+    "from": "g7",
+    "to": "g6",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Bf4",
+    "color": "white",
+    "piece": "bishop",
+    "from": "c1",
+    "to": "f4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Bg7",
+    "color": "black",
+    "piece": "bishop",
+    "from": "f8",
+    "to": "g7",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "e3",
+    "color": "white",
+    "piece": "pawn",
+    "from": "e2",
+    "to": "e3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "O-O",
+    "color": "black",
+    "piece": "king",
+    "from": "e8",
+    "to": "g8",
+    "capturedSquare": null,
+    "castle": "king",
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "c4",
+    "color": "white",
+    "piece": "pawn",
+    "from": "c2",
+    "to": "c4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "d6",
+    "color": "black",
+    "piece": "pawn",
+    "from": "d7",
+    "to": "d6",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nc3",
+    "color": "white",
+    "piece": "knight",
+    "from": "b1",
+    "to": "c3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nbd7",
+    "color": "black",
+    "piece": "knight",
+    "from": "b8",
+    "to": "d7",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Bd3",
+    "color": "white",
+    "piece": "bishop",
+    "from": "f1",
+    "to": "d3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "c5",
+    "color": "black",
+    "piece": "pawn",
+    "from": "c7",
+    "to": "c5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "d5",
+    "color": "white",
+    "piece": "pawn",
+    "from": "d4",
+    "to": "d5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Ng4",
+    "color": "black",
+    "piece": "knight",
+    "from": "f6",
+    "to": "g4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "O-O",
+    "color": "white",
+    "piece": "king",
+    "from": "e1",
+    "to": "g1",
+    "capturedSquare": null,
+    "castle": "king",
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "a6",
+    "color": "black",
+    "piece": "pawn",
+    "from": "a7",
+    "to": "a6",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "e4",
+    "color": "white",
+    "piece": "pawn",
+    "from": "e3",
+    "to": "e4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Rb8",
+    "color": "black",
+    "piece": "rook",
+    "from": "a8",
+    "to": "b8",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "a4",
+    "color": "white",
+    "piece": "pawn",
+    "from": "a2",
+    "to": "a4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Re8",
+    "color": "black",
+    "piece": "rook",
+    "from": "f8",
+    "to": "e8",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "h3",
+    "color": "white",
+    "piece": "pawn",
+    "from": "h2",
+    "to": "h3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nge5",
+    "color": "black",
+    "piece": "knight",
+    "from": "g4",
+    "to": "e5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nxe5",
+    "color": "white",
+    "piece": "knight",
+    "from": "f3",
+    "to": "e5",
+    "capturedSquare": "e5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nxe5",
+    "color": "black",
+    "piece": "knight",
+    "from": "d7",
+    "to": "e5",
+    "capturedSquare": "e5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Bg3",
+    "color": "white",
+    "piece": "bishop",
+    "from": "f4",
+    "to": "g3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nxd3",
+    "color": "black",
+    "piece": "knight",
+    "from": "e5",
+    "to": "d3",
+    "capturedSquare": "d3",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Qxd3",
+    "color": "white",
+    "piece": "queen",
+    "from": "d1",
+    "to": "d3",
+    "capturedSquare": "d3",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "f5",
+    "color": "black",
+    "piece": "pawn",
+    "from": "f7",
+    "to": "f5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "exf5",
+    "color": "white",
+    "piece": "pawn",
+    "from": "e4",
+    "to": "f5",
+    "capturedSquare": "f5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Bxf5",
+    "color": "black",
+    "piece": "bishop",
+    "from": "c8",
+    "to": "f5",
+    "capturedSquare": "f5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Qe3",
+    "color": "white",
+    "piece": "queen",
+    "from": "d3",
+    "to": "e3",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "e5",
+    "color": "black",
+    "piece": "pawn",
+    "from": "e7",
+    "to": "e5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "dxe6",
+    "color": "white",
+    "piece": "pawn",
+    "from": "d5",
+    "to": "e6",
+    "capturedSquare": "e5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Rxe6",
+    "color": "black",
+    "piece": "rook",
+    "from": "e8",
+    "to": "e6",
+    "capturedSquare": "e6",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Qd2",
+    "color": "white",
+    "piece": "queen",
+    "from": "e3",
+    "to": "d2",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Qd7",
+    "color": "black",
+    "piece": "queen",
+    "from": "d8",
+    "to": "d7",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Rac1",
+    "color": "white",
+    "piece": "rook",
+    "from": "a1",
+    "to": "c1",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Rbe8",
+    "color": "black",
+    "piece": "rook",
+    "from": "b8",
+    "to": "e8",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nd5",
+    "color": "white",
+    "piece": "knight",
+    "from": "c3",
+    "to": "d5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Re2",
+    "color": "black",
+    "piece": "rook",
+    "from": "e6",
+    "to": "e2",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Qf4",
+    "color": "white",
+    "piece": "queen",
+    "from": "d2",
+    "to": "f4",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Be5",
+    "color": "black",
+    "piece": "bishop",
+    "from": "g7",
+    "to": "e5",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Qxe5",
+    "color": "white",
+    "piece": "queen",
+    "from": "f4",
+    "to": "e5",
+    "capturedSquare": "e5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "dxe5",
+    "color": "black",
+    "piece": "pawn",
+    "from": "d6",
+    "to": "e5",
+    "capturedSquare": "e5",
+    "castle": null,
+    "promotion": null,
+    "check": false,
+    "checkmate": false
+  },
+  {
+    "san": "Nf6+",
+    "color": "white",
+    "piece": "knight",
+    "from": "d5",
+    "to": "f6",
+    "capturedSquare": null,
+    "castle": null,
+    "promotion": null,
+    "check": true,
+    "checkmate": false
+  }
+];
+
+function squareToRowCol(sq){
+  const file = sq.charCodeAt(0) - 97;
+  const rank = parseInt(sq[1], 10);
+  return { row: 8 - rank, col: file };
+}
+
+function initChess(){
+  const frameEl = document.getElementById('chessFrame');
+  const boardEl = document.getElementById('chessBoard');
+  const piecesEl = document.getElementById('chessPieces');
+  const moveListEl = document.getElementById('chessMoveList');
+  const statusEl = document.getElementById('chessStatus');
+  if(!boardEl || !piecesEl || !moveListEl || !statusEl) return;
+
+  const files = ['a','b','c','d','e','f','g','h'];
+
+  // build 64 squares
+  for(let row = 0; row < 8; row++){
+    for(let col = 0; col < 8; col++){
+      const rank = 8 - row;
+      const sq = files[col] + rank;
+      const div = document.createElement('div');
+      div.className = 'chess-sq ' + (((col + rank) % 2 === 0) ? 'light' : 'dark');
+      div.dataset.square = sq;
+      boardEl.appendChild(div);
+    }
+  }
+
+  // build move list
+  let rows = '';
+  for(let i = 0; i < CHESS_GAME.length; i += 2){
+    const num = i / 2 + 1;
+    const w = CHESS_GAME[i];
+    const b = CHESS_GAME[i + 1];
+    rows += `<li>
+      <span class="chess-move-num">${num}.</span>
+      <span class="chess-move-san" data-ply="${i + 1}">${w.san}</span>
+      <span class="chess-move-san ${b ? '' : 'empty'}" ${b ? `data-ply="${i + 2}"` : ''}>${b ? b.san : ''}</span>
+    </li>`;
+  }
+  moveListEl.innerHTML = rows;
+
+  const firstBtn = document.getElementById('chessFirst');
+  const prevBtn  = document.getElementById('chessPrev');
+  const nextBtn  = document.getElementById('chessNext');
+  const lastBtn  = document.getElementById('chessLast');
+  const playBtn  = document.getElementById('chessPlay');
+
+  let currentPly = 0;
+  let autoplayTimer = null;
+
+  function pieceImgSrc(color, piece){
+    return `${CONFIG.CHESS_PIECE_PATH}${color}_${piece}.png`;
+  }
+
+  function computeBoardState(ply){
+    const state = {};
+    Object.keys(CHESS_START).forEach(sq => {
+      state[sq] = { color: CHESS_START[sq][0], piece: CHESS_START[sq][1] };
+    });
+    for(let i = 0; i < ply; i++){
+      const m = CHESS_GAME[i];
+      if(m.capturedSquare) delete state[m.capturedSquare];
+      const moving = state[m.from];
+      delete state[m.from];
+      state[m.to] = { color: m.color, piece: m.promotion || (moving ? moving.piece : m.piece) };
+      if(m.castle){
+        const rank = m.color === 'white' ? 1 : 8;
+        if(m.castle === 'king'){
+          const rook = state[`h${rank}`];
+          delete state[`h${rank}`];
+          state[`f${rank}`] = rook;
+        } else {
+          const rook = state[`a${rank}`];
+          delete state[`a${rank}`];
+          state[`d${rank}`] = rook;
+        }
+      }
+    }
+    return state;
+  }
+
+  function render(){
+    const state = computeBoardState(currentPly);
+
+    piecesEl.innerHTML = '';
+    Object.keys(state).forEach(sq => {
+      const { row, col } = squareToRowCol(sq);
+      const { color, piece } = state[sq];
+      const wrap = document.createElement('div');
+      wrap.className = 'chess-piece';
+      wrap.style.left = (col * 12.5) + '%';
+      wrap.style.top = (row * 12.5) + '%';
+      const img = document.createElement('img');
+      img.src = pieceImgSrc(color, piece);
+      img.alt = `${color} ${piece}`;
+      img.loading = 'lazy';
+      img.draggable = false;
+      wrap.appendChild(img);
+      piecesEl.appendChild(wrap);
+    });
+
+    boardEl.querySelectorAll('.chess-sq').forEach(s => {
+      s.classList.remove('hl');
+      s.classList.remove('check');
+    });
+
+    if(currentPly > 0){
+      const m = CHESS_GAME[currentPly - 1];
+      const fromEl = boardEl.querySelector(`[data-square="${m.from}"]`);
+      const toEl = boardEl.querySelector(`[data-square="${m.to}"]`);
+      if(fromEl) fromEl.classList.add('hl');
+      if(toEl) toEl.classList.add('hl');
+
+      if(m.castle){
+        const rank = m.color === 'white' ? 1 : 8;
+        const rookFrom = m.castle === 'king' ? `h${rank}` : `a${rank}`;
+        const rookTo = m.castle === 'king' ? `f${rank}` : `d${rank}`;
+        [rookFrom, rookTo].forEach(sq => {
+          const el = boardEl.querySelector(`[data-square="${sq}"]`);
+          if(el) el.classList.add('hl');
+        });
+      }
+
+      if(m.check || m.checkmate){
+        const oppColor = m.color === 'white' ? 'black' : 'white';
+        const kingSq = Object.keys(state).find(sq => state[sq].color === oppColor && state[sq].piece === 'king');
+        const kEl = kingSq && boardEl.querySelector(`[data-square="${kingSq}"]`);
+        if(kEl) kEl.classList.add('check');
+      }
+    }
+
+    moveListEl.querySelectorAll('.chess-move-san').forEach(el => {
+      el.classList.toggle('active', Number(el.dataset.ply) === currentPly);
+    });
+    const activeEl = moveListEl.querySelector('.chess-move-san.active');
+    if(activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+
+    if(currentPly === 0){
+      statusEl.textContent = 'START — press ▶ to play through the game';
+    } else {
+      const m = CHESS_GAME[currentPly - 1];
+      const moveNum = Math.ceil(currentPly / 2);
+      const label = `${moveNum}${m.color === 'white' ? '.' : '...'} ${m.san}`;
+      statusEl.textContent = (currentPly === CHESS_GAME.length) ? `${label}  —  1–0, White wins` : label;
+    }
+
+    firstBtn.disabled = prevBtn.disabled = (currentPly === 0);
+    lastBtn.disabled = nextBtn.disabled = (currentPly === CHESS_GAME.length);
+  }
+
+  function stopAutoplay(){
+    if(autoplayTimer){
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+      playBtn.textContent = '▶ PLAY';
+    }
+  }
+
+  function goTo(ply){
+    currentPly = Math.max(0, Math.min(CHESS_GAME.length, ply));
+    render();
+  }
+
+  firstBtn.addEventListener('click', () => { stopAutoplay(); goTo(0); });
+  prevBtn.addEventListener('click',  () => { stopAutoplay(); goTo(currentPly - 1); });
+  nextBtn.addEventListener('click',  () => { stopAutoplay(); goTo(currentPly + 1); });
+  lastBtn.addEventListener('click',  () => { stopAutoplay(); goTo(CHESS_GAME.length); });
+
+  playBtn.addEventListener('click', () => {
+    if(autoplayTimer){ stopAutoplay(); return; }
+    if(currentPly >= CHESS_GAME.length) goTo(0);
+    playBtn.textContent = '❚❚ PAUSE';
+    autoplayTimer = setInterval(() => {
+      if(currentPly >= CHESS_GAME.length){ stopAutoplay(); return; }
+      goTo(currentPly + 1);
+    }, 900);
+  });
+
+  moveListEl.addEventListener('click', (e) => {
+    const t = e.target.closest('.chess-move-san');
+    if(!t || !t.dataset.ply) return;
+    stopAutoplay();
+    goTo(Number(t.dataset.ply));
+  });
+
+  if(frameEl){
+    frameEl.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowRight'){ e.preventDefault(); stopAutoplay(); goTo(currentPly + 1); }
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); stopAutoplay(); goTo(currentPly - 1); }
+    });
+  }
+
+  render();
 }
