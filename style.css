@@ -133,14 +133,6 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 .glyph-strip span.lit{ background: var(--ink); }
 .glyph-strip span.lit.accent{ background: var(--red); }
 
-.welcome-dots{
-  display: grid;
-  gap: 2px;
-  margin: 0 0 22px;
-  --wd-size: 4px;
-}
-.welcome-dots .dot{ width: var(--wd-size); height: var(--wd-size); border-radius: 50%; background: var(--ink); }
-.welcome-dots .dot.red{ background: var(--red); }
 .hero-title{
   font-size: clamp(42px, 9vw, 96px);
   line-height: 0.98;
@@ -388,17 +380,13 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 
 .mini-chess-layer{ position: absolute; inset: 0; }
 .mini-chess-piece{
-  position: absolute; width: 14px; height: 14px;
+  position: absolute; width: 16.5px; height: 16.5px;
+  display: flex; align-items: center; justify-content: center;
   transition: left 620ms cubic-bezier(.4,0,.2,1), top 620ms cubic-bezier(.4,0,.2,1),
               transform 620ms cubic-bezier(.4,0,.2,1), opacity 300ms ease;
 }
-.mini-chess-piece img{ width:100%; height:100%; object-fit:contain; image-rendering:pixelated; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+.mini-chess-piece img{ width:84%; height:84%; object-fit:contain; image-rendering:pixelated; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 .mini-chess-piece.captured{ transform: scale(0.82); opacity: .82; }
-
-/* white piece art sits a touch low in its square compared to black —
-   nudge it up. Change the -2px below to taste (e.g. -3px, -4px). */
-.mini-chess-piece.white{ transform: translateY(-6px); }
-.mini-chess-piece.white.captured{ transform: translateY(-2px) scale(0.82); opacity: .82; }
 
 @media (max-width: 1180px){
   .mini-chess-scene{ display: none; }
@@ -501,8 +489,7 @@ code{ font-family: 'JetBrains Mono', monospace; background: var(--bg-soft); padd
 
 @media (max-width: 520px){
   .hero{ padding-top: 108px; }
-  .glyph-strip{ grid-template-columns: repeat(16, 1fr); max-width: 100%; }
-  .welcome-dots{ --wd-size: 3px; }
+  .glyph-strip{ grid-template-columns: repeat(18, 1fr); max-width: 100%; }
   .section{ padding: 64px 0; }
   .edu-card{ padding: 22px; }
 }
