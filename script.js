@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGlyphStrip();
   initCube();
   initChess();
+  initMiniChess();
   initNav();
   initScrollspy();
   initReveal();
@@ -1226,4 +1227,188 @@ function initChess(){
   }
 
   render();
+}
+
+/* ============================================================
+   MINI CHESS — decorative auto-playing replay (education section)
+   Same CHESS_START / CHESS_GAME data as the featured CHESS section,
+   but no controls: it plays itself, loops forever, and shows
+   captured pieces piling up beside the board instead of vanishing.
+
+   Unlike the featured viewer (which wipes and rebuilds every piece
+   div on every ply — fine for click-to-jump, but no animation), this
+   widget keeps one persistent DOM element per piece for its whole
+   life. Moving a piece — or flying it out to a capture stack, or
+   flying everything back to start at the end of a loop — is just
+   updating that same element's left/top, so the CSS transition on
+   .mini-chess-piece actually gets to animate it.
+   ============================================================ */
+function initMiniChess(){
+  const boardEl = document.getElementById('miniChessBoard');
+  const layerEl = document.getElementById('miniChessLayer');
+  if(!boardEl || !layerEl) return;
+
+  // Layout constants — must match the sizing in style.css
+  // (.mini-chess-board-wrap / .mini-chess-piece).
+  const BOARD_SIZE = 132;
+  const SQUARE = BOARD_SIZE / 8;
+  const BOARD_X = 40;          // left stack (34px) + gap (6px)
+  const PIECE_BOX = 14;
+  const STACK_COL_W = 17;
+  const STACK_ROW_H = SQUARE;  // 8 rows fit exactly in the board's height
+
+  const MOVE_INTERVAL = 1100;  // ms between plies while playing
+  const END_PAUSE = 1800;      // ms to hold the final position before resetting
+  const RESET_HOLD = 1400;     // ms to let the "fly back to start" settle before replaying
+
+  // build the 64 background squares once (purely visual)
+  const files = ['a','b','c','d','e','f','g','h'];
+  for(let row = 0; row < 8; row++){
+    for(let col = 0; col < 8; col++){
+      const rank = 8 - row;
+      const div = document.createElement('div');
+      div.className = 'mini-chess-sq ' + (((col + rank) % 2 === 0) ? 'light' : 'dark');
+      boardEl.appendChild(div);
+    }
+  }
+
+  function pieceImgSrc(color, piece){
+    return `${CONFIG.CHESS_PIECE_PATH}${color}_${piece}.png`;
+  }
+
+  function squareCoord(sq){
+    const { row, col } = squareToRowCol(sq);
+    return {
+      left: BOARD_X + col * SQUARE + (SQUARE - PIECE_BOX) / 2,
+      top:  row * SQUARE + (SQUARE - PIECE_BOX) / 2,
+    };
+  }
+
+  // side: 'left' for captured white pieces, 'right' for captured black pieces
+  function stackCoord(side, index){
+    const col = Math.floor(index / 8);
+    const row = index % 8;
+    const left = side === 'left'
+      ? (34 - STACK_COL_W * (col + 1)) + (STACK_COL_W - PIECE_BOX) / 2
+      : (BOARD_X + BOARD_SIZE + 6) + col * STACK_COL_W + (STACK_COL_W - PIECE_BOX) / 2;
+    const top = row * STACK_ROW_H + (STACK_ROW_H - PIECE_BOX) / 2;
+    return { left, top };
+  }
+
+  let trackers = [];
+  let bySquare = {};
+  let currentPly = 0;
+  let capturedLeft = 0;
+  let capturedRight = 0;
+  let timer = null;
+
+  function placeOnBoard(t){
+    const { left, top } = squareCoord(t.square);
+    t.el.classList.remove('captured');
+    t.el.style.left = left + 'px';
+    t.el.style.top = top + 'px';
+  }
+
+  function placeInStack(t){
+    const { left, top } = stackCoord(t.capturedSide, t.capturedIndex);
+    t.el.classList.add('captured');
+    t.el.style.left = left + 'px';
+    t.el.style.top = top + 'px';
+  }
+
+  function setupGame(){
+    layerEl.innerHTML = '';
+    trackers = Object.keys(CHESS_START).map(sq => {
+      const [color, piece] = CHESS_START[sq];
+      const el = document.createElement('div');
+      el.className = 'mini-chess-piece';
+      const img = document.createElement('img');
+      img.alt = '';
+      img.draggable = false;
+      img.loading = 'lazy';
+      img.src = pieceImgSrc(color, piece);
+      el.appendChild(img);
+      layerEl.appendChild(el);
+      return { startSquare: sq, square: sq, color, piece, origPiece: piece, capturedSide: null, capturedIndex: -1, el, img };
+    });
+    bySquare = {};
+    trackers.forEach(t => { placeOnBoard(t); bySquare[t.square] = t; });
+    capturedLeft = 0;
+    capturedRight = 0;
+    currentPly = 0;
+  }
+
+  function applyPly(){
+    const m = CHESS_GAME[currentPly];
+    currentPly++;
+
+    if(m.capturedSquare && bySquare[m.capturedSquare]){
+      const cap = bySquare[m.capturedSquare];
+      delete bySquare[m.capturedSquare];
+      cap.square = null;
+      if(cap.color === 'white'){ cap.capturedSide = 'left'; cap.capturedIndex = capturedLeft++; }
+      else { cap.capturedSide = 'right'; cap.capturedIndex = capturedRight++; }
+      placeInStack(cap);
+    }
+
+    const mover = bySquare[m.from];
+    if(mover){
+      delete bySquare[m.from];
+      mover.square = m.to;
+      if(m.promotion && m.promotion !== mover.piece){
+        mover.piece = m.promotion;
+        mover.img.src = pieceImgSrc(mover.color, mover.piece);
+      }
+      bySquare[m.to] = mover;
+      placeOnBoard(mover);
+    }
+
+    if(m.castle){
+      const rank = m.color === 'white' ? 1 : 8;
+      const rookFrom = m.castle === 'king' ? `h${rank}` : `a${rank}`;
+      const rookTo   = m.castle === 'king' ? `f${rank}` : `d${rank}`;
+      const rook = bySquare[rookFrom];
+      if(rook){
+        delete bySquare[rookFrom];
+        rook.square = rookTo;
+        bySquare[rookTo] = rook;
+        placeOnBoard(rook);
+      }
+    }
+  }
+
+  function resetToStart(){
+    trackers.forEach(t => {
+      t.square = t.startSquare;
+      t.capturedSide = null;
+      t.capturedIndex = -1;
+      if(t.piece !== t.origPiece){
+        t.piece = t.origPiece;
+        t.img.src = pieceImgSrc(t.color, t.piece);
+      }
+      placeOnBoard(t); // same elements, new left/top → the browser animates the flight home
+    });
+    bySquare = {};
+    trackers.forEach(t => { bySquare[t.square] = t; });
+    capturedLeft = 0;
+    capturedRight = 0;
+    currentPly = 0;
+  }
+
+  function tick(){
+    if(currentPly < CHESS_GAME.length){
+      applyPly();
+      if(currentPly >= CHESS_GAME.length){
+        timer = setTimeout(() => {
+          resetToStart();
+          timer = setTimeout(tick, RESET_HOLD);
+        }, END_PAUSE);
+        return;
+      }
+    }
+    timer = setTimeout(tick, MOVE_INTERVAL);
+  }
+
+  setupGame();
+  timer = setTimeout(tick, MOVE_INTERVAL);
 }
