@@ -1041,32 +1041,47 @@ function squareToRowCol(sq){
 
 /* ============================================================
    MINI CHESS — decorative auto-playing replay (education section)
-   Same CHESS_START / CHESS_GAME data as the featured CHESS section,
-   but no controls: it plays itself, loops forever, and shows
-   captured pieces piling up beside the board instead of vanishing.
+   Same CHESS_START / CHESS_GAME data as the featured CHESS section.
+   It plays itself once and shows captured pieces piling up beside
+   the board instead of vanishing. When the game ends it stops and
+   holds the final position, revealing a REPLAY button over the
+   board; clicking it flies every piece back to its start square and
+   plays the game again.
 
    Unlike the featured viewer (which wipes and rebuilds every piece
    div on every ply — fine for click-to-jump, but no animation), this
    widget keeps one persistent DOM element per piece for its whole
    life. Moving a piece — or flying it out to a capture stack, or
-   flying everything back to start at the end of a loop — is just
-   updating that same element's left/top, so the CSS transition on
-   .mini-chess-piece actually gets to animate it.
+   flying everything back to start on replay — is just updating that
+   same element's left/top, so the CSS transition on .mini-chess-piece
+   actually gets to animate it.
    ============================================================ */
 function initMiniChess(){
   const sceneEl = document.getElementById('miniChessScene');
   const boardEl = document.getElementById('miniChessBoard');
   const layerEl = document.getElementById('miniChessLayer');
+  const replayEl = document.getElementById('miniChessReplay');
   if(!boardEl || !layerEl) return;
 
   // Layout constants — must match the sizing in style.css
   // (.mini-chess-board-wrap / .mini-chess-piece).
-  const BOARD_SIZE = 132;
-  const SQUARE = BOARD_SIZE / 8;
+  //
+  // .mini-chess-board-wrap is 136×136 *border-box* (global box-sizing:
+  // border-box) with a 4px border, and .mini-chess-board (the actual
+  // checkerboard) is an absolutely-positioned child with inset:0 — which
+  // sizes to the wrap's PADDING box, i.e. inside the border. So the
+  // checkerboard only ever renders in a 136 - 2*4 = 128px square, not the
+  // full 136. SQUARE has to come from that real interior, and every board
+  // coordinate needs a +BORDER offset, or pieces drift further from their
+  // square the further they are from the top-left corner.
+  const BORDER = 4;                      // must match .mini-chess-board-wrap's border-width
+  const INTERIOR = 128;                  // wrap's actual rendered checkerboard size (136 - 2*4)
+  const SQUARE = INTERIOR / 8;           // 16 — a whole pixel
+  const WRAP_SIZE = INTERIOR + BORDER * 2; // 136 — must match .mini-chess-board-wrap's width/height
   const BOARD_X = 40;          // left stack (34px) + gap (6px)
 
   const MOVE_INTERVAL = 1100;  // ms between plies while playing
-  const END_PAUSE = 1800;      // ms to hold the final position before resetting
+  const END_PAUSE = 1800;      // ms to hold the final position before showing the replay button
   const RESET_HOLD = 1400;     // ms to let the "fly back to start" settle before replaying
 
   // build the 64 background squares once (purely visual)
@@ -1084,6 +1099,70 @@ function initMiniChess(){
     return `${CONFIG.CHESS_PIECE_PATH}${color}_${piece}.png`;
   }
 
+  // The flexbox + object-fit:contain centering in CSS centers the <img>'s
+  // BOX inside its square — but if the source PNG has uneven transparent
+  // padding around the actual glyph (common across icon sets, where a
+  // knight's canvas isn't padded the same as a pawn's), the box can be
+  // centered while the drawn piece still looks off. This finds the real
+  // bounding box of opaque pixels per image and crops tight to it, once,
+  // so the image's own center *is* the glyph's center from then on.
+  const spriteCropCache = new Map(); // raw src -> Promise<cropped data URL>
+  function getCroppedSpriteSrc(src){
+    if(spriteCropCache.has(src)) return spriteCropCache.get(src);
+    const promise = new Promise(resolve => {
+      const probe = new Image();
+      probe.onload = () => {
+        try{
+          const w = probe.naturalWidth, h = probe.naturalHeight;
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(probe, 0, 0);
+          const { data } = ctx.getImageData(0, 0, w, h);
+          const ALPHA_THRESHOLD = 10;
+          let minX = w, minY = h, maxX = -1, maxY = -1;
+          for(let y = 0; y < h; y++){
+            for(let x = 0; x < w; x++){
+              if(data[(y * w + x) * 4 + 3] > ALPHA_THRESHOLD){
+                if(x < minX) minX = x;
+                if(x > maxX) maxX = x;
+                if(y < minY) minY = y;
+                if(y > maxY) maxY = y;
+              }
+            }
+          }
+          if(maxX < minX || maxY < minY){ resolve(src); return; } // fully transparent — bail out
+
+          // Crop to a square centered on the glyph's own bounding box (not
+          // the image's), padded to the larger dimension so nothing is
+          // stretched — object-fit:contain then centers this new square
+          // exactly on the visible artwork.
+          const bw = maxX - minX + 1, bh = maxY - minY + 1;
+          const side = Math.max(bw, bh);
+          const cx = minX + bw / 2, cy = minY + bh / 2;
+          const out = document.createElement('canvas');
+          out.width = side; out.height = side;
+          out.getContext('2d').drawImage(canvas, cx - side / 2, cy - side / 2, side, side, 0, 0, side, side);
+          resolve(out.toDataURL());
+        } catch(err){
+          resolve(src); // e.g. canvas tainted — fall back to the original image
+        }
+      };
+      probe.onerror = () => resolve(src);
+      probe.src = src;
+    });
+    spriteCropCache.set(src, promise);
+    return promise;
+  }
+
+  // Shows the raw sprite immediately (no blank flash while cropping runs),
+  // then swaps in the recentered version as soon as it's ready.
+  function setPieceImage(imgEl, color, piece){
+    const src = pieceImgSrc(color, piece);
+    imgEl.src = src;
+    getCroppedSpriteSrc(src).then(cropped => { imgEl.src = cropped; });
+  }
+
   // Every piece box is exactly one SQUARE, positioned at the cell's
   // top-left corner — no manual half-offset math. Centering the piece
   // artwork inside that box is CSS's job (see .mini-chess-piece
@@ -1091,7 +1170,7 @@ function initMiniChess(){
   // regardless of piece color or image proportions.
   function squareCoord(sq){
     const { row, col } = squareToRowCol(sq);
-    return { left: BOARD_X + col * SQUARE, top: row * SQUARE };
+    return { left: BOARD_X + BORDER + col * SQUARE, top: BORDER + row * SQUARE };
   }
 
   // side: 'left' for captured white pieces, 'right' for captured black pieces
@@ -1100,7 +1179,7 @@ function initMiniChess(){
     const row = index % 8;
     const left = side === 'left'
       ? (34 - SQUARE * (col + 1))
-      : (BOARD_X + BOARD_SIZE + 6) + col * SQUARE;
+      : (BOARD_X + WRAP_SIZE + 6) + col * SQUARE;
     const top = row * SQUARE;
     return { left, top };
   }
@@ -1136,7 +1215,7 @@ function initMiniChess(){
       img.alt = '';
       img.draggable = false;
       img.loading = 'lazy';
-      img.src = pieceImgSrc(color, piece);
+      setPieceImage(img, color, piece);
       el.appendChild(img);
       layerEl.appendChild(el);
       return { startSquare: sq, square: sq, color, piece, origPiece: piece, capturedSide: null, capturedIndex: -1, el, img };
@@ -1167,7 +1246,7 @@ function initMiniChess(){
       mover.square = m.to;
       if(m.promotion && m.promotion !== mover.piece){
         mover.piece = m.promotion;
-        mover.img.src = pieceImgSrc(mover.color, mover.piece);
+        setPieceImage(mover.img, mover.color, mover.piece);
       }
       bySquare[m.to] = mover;
       placeOnBoard(mover);
@@ -1194,7 +1273,7 @@ function initMiniChess(){
       t.capturedIndex = -1;
       if(t.piece !== t.origPiece){
         t.piece = t.origPiece;
-        t.img.src = pieceImgSrc(t.color, t.piece);
+        setPieceImage(t.img, t.color, t.piece);
       }
       placeOnBoard(t); // same elements, new left/top → the browser animates the flight home
     });
@@ -1205,18 +1284,39 @@ function initMiniChess(){
     currentPly = 0;
   }
 
+  function showReplayButton(){
+    if(replayEl) replayEl.classList.add('show');
+  }
+
+  function hideReplayButton(){
+    if(replayEl) replayEl.classList.remove('show');
+  }
+
   function tick(){
     if(currentPly < CHESS_GAME.length){
       applyPly();
       if(currentPly >= CHESS_GAME.length){
-        timer = setTimeout(() => {
-          resetToStart();
-          timer = setTimeout(tick, RESET_HOLD);
-        }, END_PAUSE);
+        // Hold on the final position, then stop for good — no more
+        // auto-reset loop — and let the person choose to replay.
+        timer = setTimeout(showReplayButton, END_PAUSE);
         return;
       }
     }
     timer = setTimeout(tick, MOVE_INTERVAL);
+  }
+
+  function playFromStart(){
+    hideReplayButton();
+    clearTimeout(timer);
+    resetToStart(); // same elements, new left/top → pieces animate flying back home
+    timer = setTimeout(tick, RESET_HOLD);
+  }
+
+  if(replayEl){
+    replayEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playFromStart();
+    });
   }
 
   setupGame(); // render the starting position immediately; playback waits for scroll
